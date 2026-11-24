@@ -1,0 +1,243 @@
+/* =================================================================
+   Aero Corporation - Modern SaaS Dashboard Stylesheet
+   Bidang: Teknologi, Bisnis Digital, Manajemen, & Pengembangan Usaha
+   ================================================================= */
+
+:root {
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --accent: #0284c7;
+  --bg-gradient: radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.06) 0px, transparent 50%),
+                 radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%),
+                 radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.04) 0px, transparent 50%);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f8fafc;
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* =================================================================
+   SLIM MINI SIDEBAR (PERMANENT - MATCHING USER REFERENCE SCREENSHOT)
+   ================================================================= */
+.sidebar-slim {
+  width: 5.25rem !important; /* 84px */
+}
+
+.nav-item-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.nav-icon-inactive {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1.1rem;
+  background-color: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.nav-icon-inactive:hover {
+  background-color: #e2e8f0;
+  color: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.nav-icon-active-outer {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.25rem;
+  background-color: #e8f1fd;
+  border: 1px solid rgba(191, 219, 254, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px -2px rgba(29, 78, 216, 0.15);
+  cursor: pointer;
+}
+.nav-icon-active-inner {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #1d63ed 0%, #1557bf 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 10px rgba(29, 99, 237, 0.35);
+}
+
+/* =================================================================
+   LOGIN VIEW STYLING (MATCHING USER REFERENCE IMAGE 1)
+   ================================================================= */
+.login-bg-pattern {
+  background-color: #0b192e;
+  background-image: 
+    radial-gradient(circle at 85% 15%, rgba(14, 165, 233, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 15% 85%, rgba(37, 99, 235, 0.12) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='138.56' viewBox='0 0 80 138.56'%3E%3Cpath d='M40 0 L80 23.09 L80 69.28 L40 92.38 L0 69.28 L0 23.09 Z M40 138.56 L80 115.47 L80 69.28 L40 92.38 L0 69.28 L0 115.47 Z' fill='none' stroke='rgba(56, 189, 248, 0.05)' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+/* =================================================================
+   SIDEBAR CAPSULE WIDGET (MATCHING USER REFERENCE IMAGE 2)
+   ================================================================= */
+.capsule-widget {
+  background: linear-gradient(180deg, #1d72e8 0%, #1557bf 100%);
+  border-radius: 2.25rem;
+  box-shadow: 0 10px 25px -5px rgba(29, 114, 232, 0.4), 0 8px 10px -6px rgba(29, 114, 232, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 0.6rem;
+  width: 3.75rem;
+  min-height: 8.5rem;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.capsule-badge {
+  background: rgba(10, 37, 85, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  padding: 0.3rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.capsule-btn-icon {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.capsule-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+/* =================================================================
+   FLOATING PROFILE DROPDOWN CARD (MATCHING USER REFERENCE IMAGE 3)
+   ================================================================= */
+.profile-dropdown-card {
+  box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.18), 0 8px 16px -6px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* KPI Card Hover Glow */
+.kpi-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -10px rgba(29, 78, 216, 0.15);
+}
+
+/* ID Card Chip & Holographic Aesthetic */
+.id-chip {
+  width: 38px;
+  height: 28px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 50%, #fef3c7 100%);
+  border: 1px solid rgba(180, 83, 9, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+.id-chip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(146, 64, 14, 0.6);
+}
+.id-chip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(146, 64, 14, 0.6);
+}
+
+.holo-tag {
+  background: linear-gradient(135deg, #0284c7, #4f46e5, #ec4899);
+  background-size: 200% 200%;
+  animation: holo-gradient 4s ease infinite;
+}
+
+@keyframes holo-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Print ID Card Format */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #id-card-printable, #id-card-printable * {
+    visibility: visible;
+  }
+  #id-card-printable {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 360px;
+    box-shadow: none !important;
+    border: 1px solid #1e293b !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

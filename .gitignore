@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+
+# Database file (generated on start)
+data/karyawan.db
+
+# Uploaded employee photos
+public/uploads/*
+!public/uploads/.gitkeep
+
+# System logs & OS
+Thumbs.db
+.DS_Store
+*.log

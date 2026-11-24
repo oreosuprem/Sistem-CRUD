@@ -1,0 +1,28 @@
+{
+  "name": "sistem-informasi-data-karyawan",
+  "version": "1.0.0",
+  "description": "Sistem Informasi Pengelolaan Data Karyawan & Presensi (CRUD) - Aero Corporation",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node test/test-api.js"
+  },
+  "keywords": [
+    "crud",
+    "sistem-informasi",
+    "karyawan",
+    "presensi",
+    "employee-management",
+    "express",
+    "sqlite",
+    "aero-corporation"
+  ],
+  "author": "Aero Corporation",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
