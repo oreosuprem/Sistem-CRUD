@@ -53,18 +53,64 @@ db.exec(`
     keterangan TEXT,
     bukti_foto TEXT,
     metode TEXT DEFAULT 'Web Portal',
+    latitude REAL,
+    longitude REAL,
+    lokasi TEXT,
+    jarak_meter REAL,
+    status_lokasi TEXT DEFAULT 'Di Kantor',
+    latitude_pulang REAL,
+    longitude_pulang REAL,
+    jarak_meter_pulang REAL,
+    status_lokasi_pulang TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (karyawan_id) REFERENCES karyawan(id) ON DELETE CASCADE,
     UNIQUE(karyawan_id, tanggal)
   );
+
+  CREATE TABLE IF NOT EXISTS office_location (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama_kantor TEXT NOT NULL DEFAULT 'Kantor Pusat Aero Corporation',
+    latitude REAL NOT NULL DEFAULT -6.3148979,
+    longitude REAL NOT NULL DEFAULT 106.8382681,
+    radius_meter INTEGER NOT NULL DEFAULT 200,
+    alamat TEXT DEFAULT 'Jl. Raya Lenteng Agung No.5, RT.5/RW.2, Lenteng Agung, Kec. Jagakarsa, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12530',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
-// Migration for existing databases to ensure bukti_foto exists
+// Migration for existing databases to ensure columns exist
+const presensiCols = [
+  'bukti_foto TEXT',
+  'latitude REAL',
+  'longitude REAL',
+  'lokasi TEXT',
+  'jarak_meter REAL',
+  'status_lokasi TEXT DEFAULT "Di Kantor"',
+  'latitude_pulang REAL',
+  'longitude_pulang REAL',
+  'jarak_meter_pulang REAL',
+  'status_lokasi_pulang TEXT'
+];
+for (const col of presensiCols) {
+  try {
+    db.exec(`ALTER TABLE presensi ADD COLUMN ${col};`);
+  } catch (e) {
+    // Already exists
+  }
+}
+
+// Seed default office location if table is empty
 try {
-  db.exec('ALTER TABLE presensi ADD COLUMN bukti_foto TEXT;');
+  const loc = db.prepare('SELECT id FROM office_location LIMIT 1').get();
+  if (!loc) {
+    db.prepare(`
+      INSERT INTO office_location (nama_kantor, latitude, longitude, radius_meter, alamat)
+      VALUES (?, ?, ?, ?, ?)
+    `).run('Kantor Pusat Aero Corporation', -6.3148979, 106.8382681, 200, 'Jl. Raya Lenteng Agung No.5, RT.5/RW.2, Lenteng Agung, Kec. Jagakarsa, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12530');
+  }
 } catch (e) {
-  // Already exists
+  console.error('Error seeding office location:', e);
 }
 
 // Seed default admin user if not exists

@@ -1,7 +1,5 @@
-// ==========================================
-// AERO CORPORATION - HR MANAGEMENT & PRESENSI
+// Aero Corporation - Human Resource & Attendance System
 // Client-side Application Logic (Vanilla JS)
-// ==========================================
 
 // Global State
 let currentPage = 1;
@@ -19,12 +17,29 @@ let debouncePresensiTimer = null;
 // Auth State
 let currentAuthUser = null;
 
+// Server Time Sync & GPS Geolocation State
+let serverTimeOffsetMs = 0;
+let isServerTimeSynced = false;
+let currentGPSLocation = {
+  latitude: null,
+  longitude: null,
+  accuracy: null,
+  distanceMeters: null,
+  statusLokasi: 'Belum Terdeteksi',
+  isAtOffice: false
+};
+let officeConfigCache = null;
+
 // Initialize on DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   displayCurrentDate();
+  await syncServerTime();
   startLiveClockAndGreeting();
+  setInterval(syncServerTime, 60000);
   setupKeyboardShortcuts();
   setupGlobalClickListeners();
+  fetchOfficeLocation();
+  detectGPSLocation(false);
   initAuth();
 });
 
@@ -128,14 +143,13 @@ function applyAuthenticatedUserUI() {
   // Breadcrumb portal title
   const breadcrumbCategory = document.querySelector('header .text-slate-400 span:first-child');
   const presensiFormsContainer = document.getElementById('presensi-forms-container');
+  const presensiSummaryCards = document.getElementById('presensi-summary-cards');
+  const presensiTableContainer = document.getElementById('presensi-table-container');
   const presensiTableTitle = document.getElementById('presensi-table-title');
   const thAksi = document.getElementById('th-presensi-aksi');
 
   if (isKaryawan) {
-    // ==========================================
-    // ROLE: KARYAWAN (HANYA TAMPILAN UNTUK ABSEN SAJA)
-    // ==========================================
-    // 1. Sembunyikan menu-menu Admin di Sidebar
+    // Role: Karyawan (portal mandiri untuk absen)
     if (navKaryawan) navKaryawan.classList.add('hidden');
     if (navStats) navStats.classList.add('hidden');
     if (navAbout) navAbout.classList.add('hidden');
@@ -143,7 +157,6 @@ function applyAuthenticatedUserUI() {
     if (dropdownSettingsBtn) dropdownSettingsBtn.classList.add('hidden');
     if (dropdownExportBtn) dropdownExportBtn.classList.add('hidden');
 
-    // 2. Aktifkan & sesuaikan judul navigasi Presensi
     if (navPresensi) {
       navPresensi.classList.remove('hidden');
       const presensiBtn = document.getElementById('sidebar-nav-presensi');
@@ -152,6 +165,12 @@ function applyAuthenticatedUserUI() {
 
     // 3. Tampilkan Form Absensi Pribadi
     if (presensiFormsContainer) presensiFormsContainer.classList.remove('hidden');
+
+    // 4. SEMBUNYIKAN KARTU KPI RINGKASAN & TABEL PRESENSI UNTUK KARYAWAN
+    // Sesuai instruksi: "pada hak akses akun karyawan tolong hapus tabel tabel ini, karna tabel ini khusus ditampilkan untuk admin"
+    // dan "untuk karyawan hanya terdapat tampilan untuk absen saja"
+    if (presensiSummaryCards) presensiSummaryCards.classList.add('hidden');
+    if (presensiTableContainer) presensiTableContainer.classList.add('hidden');
 
     // Kunci ID Card & Nama Karyawan ke profil yang login
     const presensiHidden = document.getElementById('presensi-select-karyawan');
@@ -192,18 +211,13 @@ function applyAuthenticatedUserUI() {
       pulangInput.classList.add('bg-slate-100', 'cursor-not-allowed');
     }
 
-    // 4. Ubah judul tabel riwayat presensi
-    if (presensiTableTitle) presensiTableTitle.textContent = 'Riwayat Presensi Saya (Log Kehadiran)';
     if (breadcrumbCategory) breadcrumbCategory.textContent = 'Portal Karyawan';
     if (thAksi) thAksi.classList.add('hidden');
 
     // Alihkan langsung ke tab Presensi
     switchTab('presensi');
   } else {
-    // ==========================================
-    // ROLE: ADMIN (SEMUA FITUR KECUALI FITUR ABSEN)
-    // ==========================================
-    // 1. Tampilkan semua menu di Sidebar
+    // Role: Admin (semua manajemen & pelaporan kecuali form absen)
     if (navKaryawan) navKaryawan.classList.remove('hidden');
     if (navPresensi) {
       navPresensi.classList.remove('hidden');
@@ -220,6 +234,10 @@ function applyAuthenticatedUserUI() {
     // Sesuai permintaan: "dan untuk admin menampilkan semua fitur kecuali fitur absen, hanya ada tabel daftar karyawan yang sudah absen hadir dan pulang"
     if (presensiFormsContainer) presensiFormsContainer.classList.add('hidden');
 
+    // 3. TAMPILKAN KARTU KPI RINGKASAN & TABEL PRESENSI UNTUK ADMIN
+    if (presensiSummaryCards) presensiSummaryCards.classList.remove('hidden');
+    if (presensiTableContainer) presensiTableContainer.classList.remove('hidden');
+
     // Kembalikan form ID Card presensi jika admin ingin membukanya nanti
     const presensiInput = document.getElementById('presensi-input-idcard');
     if (presensiInput) {
@@ -227,7 +245,7 @@ function applyAuthenticatedUserUI() {
       presensiInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
     }
 
-    // 3. Tampilkan kembali kolom Aksi & judul tabel
+    // 4. Tampilkan kembali kolom Aksi & judul tabel
     if (presensiTableTitle) presensiTableTitle.textContent = 'Log & Riwayat Presensi Karyawan';
     if (breadcrumbCategory) breadcrumbCategory.textContent = 'Portal SDM';
     if (thAksi) thAksi.classList.remove('hidden');
@@ -250,13 +268,13 @@ function switchAuthTab(tab) {
   const regForm = document.getElementById('form-register');
 
   if (tab === 'login') {
-    loginBtn.className = 'flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#0284c7] transition duration-200 shadow-md';
-    regBtn.className = 'flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-400 hover:text-white transition duration-200';
+    loginBtn.className = 'flex-1 py-2 rounded-md font-bold text-xs sm:text-sm text-slate-900 bg-white shadow-xs transition duration-150';
+    regBtn.className = 'flex-1 py-2 rounded-md font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition duration-150';
     loginForm?.classList.remove('hidden');
     regForm?.classList.add('hidden');
   } else {
-    regBtn.className = 'flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#0284c7] transition duration-200 shadow-md';
-    loginBtn.className = 'flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-400 hover:text-white transition duration-200';
+    regBtn.className = 'flex-1 py-2 rounded-md font-bold text-xs sm:text-sm text-slate-900 bg-white shadow-xs transition duration-150';
+    loginBtn.className = 'flex-1 py-2 rounded-md font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition duration-150';
     regForm?.classList.remove('hidden');
     loginForm?.classList.add('hidden');
   }
@@ -445,15 +463,15 @@ async function toggleNotificationDropdown(e) {
               <div class="flex-1 overflow-hidden">
                 <div class="flex items-center justify-between">
                   <h5 class="font-bold text-slate-800 text-[11px] truncate">${escapeHtml(n.title)}</h5>
-                  <span class="text-[9px] text-slate-400">${escapeHtml(n.time)}</span>
+                  <span class="text-[9px] text-slate-500">${escapeHtml(n.time)}</span>
                 </div>
-                <p class="text-[10px] text-slate-500 mt-0.5 leading-snug">${escapeHtml(n.desc)}</p>
+                <p class="text-[10px] text-slate-600 mt-0.5 leading-snug">${escapeHtml(n.desc)}</p>
               </div>
             </div>
           `).join('');
         }
       } catch (err) {
-        listEl.innerHTML = '<p class="text-[11px] text-slate-400 italic">Gagal memuat notifikasi.</p>';
+        listEl.innerHTML = '<p class="text-[11px] text-slate-500 italic">Gagal memuat notifikasi.</p>';
       }
     }
   } else {
@@ -472,15 +490,124 @@ function toggleProfileDropdown(e) {
   card.classList.toggle('hidden');
 }
 
-// Settings Modal Handlers (Containing CSV Export - Matching Gambar 2)
-function openModalSettings() {
+// Settings Modal Handlers (Containing CSV Export & Office GPS Configuration)
+async function openModalSettings() {
   document.getElementById('dropdown-profile-card')?.classList.add('hidden');
   applyAuthenticatedUserUI();
   document.getElementById('modal-settings')?.classList.remove('hidden');
+
+  // Load current office location into form
+  try {
+    const res = await fetch('/api/office-location');
+    const json = await res.json();
+    if (json.success && json.data) {
+      const office = json.data;
+      officeConfigCache = office;
+      const nameInp = document.getElementById('office-input-name');
+      const radiusInp = document.getElementById('office-input-radius');
+      const latInp = document.getElementById('office-input-lat');
+      const lngInp = document.getElementById('office-input-lng');
+      const hint = document.getElementById('office-current-coords-hint');
+
+      if (nameInp) nameInp.value = office.nama_kantor || '';
+      if (radiusInp) radiusInp.value = office.radius_meter || 200;
+      if (latInp) latInp.value = office.latitude != null ? office.latitude : '';
+      if (lngInp) lngInp.value = office.longitude != null ? office.longitude : '';
+      if (hint) hint.textContent = `Titik aktif: ${office.latitude}, ${office.longitude} (Radius: ${office.radius_meter}m)`;
+    }
+  } catch (e) {
+    console.error('Gagal memuat setting kantor:', e);
+  }
 }
 
 function closeModalSettings() {
   document.getElementById('modal-settings')?.classList.add('hidden');
+}
+
+// Handle Save Office Location (Admin)
+async function handleSaveOfficeLocation(e) {
+  e.preventDefault();
+  const nama_kantor = document.getElementById('office-input-name').value;
+  const radius_meter = document.getElementById('office-input-radius').value;
+  const latitude = document.getElementById('office-input-lat').value;
+  const longitude = document.getElementById('office-input-lng').value;
+  const btn = document.getElementById('btn-save-office-loc');
+
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/office-location', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nama_kantor, radius_meter, latitude, longitude })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message);
+
+    officeConfigCache = json.data;
+    Swal.fire({
+      icon: 'success',
+      title: 'Titik Kantor Disimpan!',
+      text: `Lokasi ${json.data.nama_kantor} berhasil diatur pada koordinat (${json.data.latitude}, ${json.data.longitude}) radius ${json.data.radius_meter}m.`,
+      timer: 2500,
+      showConfirmButton: false
+    });
+
+    const hint = document.getElementById('office-current-coords-hint');
+    if (hint) hint.textContent = `Titik aktif: ${json.data.latitude}, ${json.data.longitude} (Radius: ${json.data.radius_meter}m)`;
+
+    // Refresh current GPS status against new office coords
+    detectGPSLocation(false);
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal Menyimpan Lokasi Kantor',
+      text: err.message,
+      confirmButtonColor: '#2563eb'
+    });
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Set Office Location using Admin's current GPS position
+function setOfficeLocationFromCurrentGPS() {
+  if (!navigator.geolocation) {
+    Swal.fire({ icon: 'error', title: 'GPS Tidak Didukung', text: 'Browser tidak mendukung GPS.' });
+    return;
+  }
+  Swal.fire({
+    title: 'Mendeteksi Posisi Anda...',
+    text: 'Mengambil koordinat GPS lokasi perangkat Anda saat ini.',
+    allowOutsideClick: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const latInp = document.getElementById('office-input-lat');
+      const lngInp = document.getElementById('office-input-lng');
+      if (latInp) latInp.value = lat;
+      if (lngInp) lngInp.value = lng;
+      Swal.fire({
+        icon: 'success',
+        title: 'Koordinat Ditemukan!',
+        html: `Lokasi Anda: <strong>${lat.toFixed(6)}, ${lng.toFixed(6)}</strong> telah disalin ke input form. Silakan klik tombol <strong>Simpan Titik Kantor</strong> untuk menetapkannya.`,
+        confirmButtonColor: '#2563eb'
+      });
+    },
+    err => {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Izin Lokasi Diperlukan',
+        text: 'Tidak dapat mendeteksi koordinat: ' + err.message,
+        confirmButtonColor: '#2563eb'
+      });
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 // Handle Import CSV Submit
@@ -643,10 +770,183 @@ function setupKeyboardShortcuts() {
   });
 }
 
-// Display Current Date in Indonesian
+// Server Time Sync & GPS Geolocation (Anti-tamper clock)
+async function syncServerTime() {
+  try {
+    const reqStart = Date.now();
+    const res = await fetch('/api/time');
+    const json = await res.json();
+    const reqEnd = Date.now();
+    const latency = Math.round((reqEnd - reqStart) / 2);
+    if (json.success && json.server_time_ms) {
+      serverTimeOffsetMs = (json.server_time_ms + latency) - reqEnd;
+      isServerTimeSynced = true;
+    }
+  } catch (e) {
+    console.warn('Gagal sinkronisasi waktu server:', e);
+  }
+}
+
+// Get verified real-time Date object
+function getServerNow() {
+  return new Date(Date.now() + serverTimeOffsetMs);
+}
+
+// Fetch office location coordinates & radius from server
+async function fetchOfficeLocation() {
+  try {
+    const res = await fetch('/api/office-location');
+    const json = await res.json();
+    if (json.success) {
+      officeConfigCache = json.data;
+    }
+  } catch (e) {
+    console.error('Gagal mengambil titik kantor:', e);
+  }
+}
+
+// Calculate distance between two GPS coordinates in meters (Haversine formula)
+function calculateClientDistance(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const R = 6371e3;
+  const toRad = deg => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+// Detect GPS location from browser Geolocation API
+function detectGPSLocation(showToast = false) {
+  const badgeEl = document.getElementById('gps-status-badge');
+  const distanceEl = document.getElementById('gps-distance-text');
+  const coordsEl = document.getElementById('gps-coords-display');
+  const btn = document.getElementById('btn-detect-gps');
+  const mapLink = document.getElementById('gps-map-link');
+
+  const latInput = document.getElementById('presensi-latitude');
+  const lngInput = document.getElementById('presensi-longitude');
+  const lokasiInput = document.getElementById('presensi-lokasi');
+
+  if (!navigator.geolocation) {
+    if (badgeEl) {
+      badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300';
+      badgeEl.textContent = 'GPS Tidak Didukung';
+    }
+    if (distanceEl) distanceEl.textContent = 'Browser Anda tidak mendukung Geolocation.';
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i><span>Mendeteksi...</span>`;
+  }
+  if (badgeEl) {
+    badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200';
+    badgeEl.textContent = 'Mencari Koordinat...';
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const acc = Math.round(position.coords.accuracy);
+
+      currentGPSLocation.latitude = lat;
+      currentGPSLocation.longitude = lng;
+      currentGPSLocation.accuracy = acc;
+
+      if (latInput) latInput.value = lat;
+      if (lngInput) lngInput.value = lng;
+
+      let distance = null;
+      let isOffice = false;
+      const office = officeConfigCache || { latitude: -6.3148979, longitude: 106.8382681, radius_meter: 200, nama_kantor: 'Kantor Pusat Aero Corporation' };
+
+      if (office && office.latitude != null && office.longitude != null) {
+        distance = calculateClientDistance(lat, lng, office.latitude, office.longitude);
+        currentGPSLocation.distanceMeters = distance;
+        isOffice = distance <= office.radius_meter;
+        currentGPSLocation.isAtOffice = isOffice;
+        currentGPSLocation.statusLokasi = isOffice ? 'Di Kantor' : 'Di Luar Kantor';
+      }
+
+      if (lokasiInput) lokasiInput.value = isOffice ? office.nama_kantor : 'Di Luar Kantor';
+
+      if (badgeEl) {
+        if (isOffice) {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+          badgeEl.innerHTML = `<i class="fa-solid fa-building mr-1"></i>Di Kantor (${distance}m)`;
+        } else {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
+          const distLabel = distance >= 1000 ? (distance / 1000).toFixed(1) + ' km' : `${distance} m`;
+          badgeEl.innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i>Di Luar Kantor (${distLabel})`;
+        }
+      }
+
+      if (distanceEl) {
+        distanceEl.textContent = isOffice 
+          ? `Terverifikasi dalam radius ${office.radius_meter}m dari ${office.nama_kantor}`
+          : `Berada di luar radius kantor (${office.nama_kantor})`;
+      }
+
+      if (coordsEl) {
+        coordsEl.textContent = `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)} (±${acc}m)`;
+      }
+
+      if (mapLink) {
+        mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+        mapLink.classList.remove('hidden');
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-check mr-1 text-emerald-600"></i><span>Cek Lokasi</span>`;
+      }
+
+      if (showToast) {
+        Swal.fire({
+          icon: isOffice ? 'success' : 'info',
+          title: isOffice ? 'Lokasi Valid: Di Kantor' : 'Lokasi: Di Luar Kantor',
+          html: `Titik GPS terdeteksi: <strong>${lat.toFixed(5)}, ${lng.toFixed(5)}</strong><br>Jarak ke kantor: <strong>${distance} meter</strong> (Radius batas: ${office.radius_meter}m).`,
+          timer: 3000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error => {
+      console.warn('Geolocation error:', error);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-600"></i><span>Coba Lagi</span>`;
+      }
+      if (badgeEl) {
+        badgeEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300';
+        badgeEl.textContent = 'Izin Lokasi Ditolak';
+      }
+      if (distanceEl) {
+        distanceEl.textContent = 'Mohon izinkan akses lokasi (GPS) pada browser agar verifikasi kantor terbaca.';
+      }
+      if (showToast) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Izin Lokasi Diperlukan',
+          text: 'Browser menolak izin lokasi. Silakan klik ikon gembok di address bar dan aktifkan perizinan Lokasi (Location) untuk situs ini.',
+          confirmButtonColor: '#2563eb'
+        });
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+// Display Current Date in Indonesian (Using Server Verified Date)
 function displayCurrentDate() {
-  const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-  const today = new Date().toLocaleDateString('id-ID', options);
+  const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Jakarta' };
+  const today = getServerNow().toLocaleDateString('id-ID', options);
   const el = document.getElementById('current-date');
   if (el) el.textContent = today;
 
@@ -654,7 +954,7 @@ function displayCurrentDate() {
   if (presensiDateEl) presensiDateEl.textContent = today;
 }
 
-// Live Clock & Time-based Greeting
+// Live Clock & Time-based Greeting (Server Real-time Sync - Tamper Proof)
 function startLiveClockAndGreeting() {
   const clockEl = document.getElementById('live-clock');
   const greetingEl = document.getElementById('hero-greeting');
@@ -663,18 +963,22 @@ function startLiveClockAndGreeting() {
   const pulangLiveTime = document.getElementById('pulang-info-jam-pulang');
 
   function update() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const timeStr = `${hours}:${minutes}:${seconds} WIB`;
+    const now = getServerNow();
+    const formatterTime = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    const currentHms = formatterTime.format(now);
+    const timeStr = `${currentHms} WIB`;
 
     if (clockEl) clockEl.textContent = timeStr;
     if (presensiClockEl) presensiClockEl.textContent = timeStr;
     if (pulangLiveTime) pulangLiveTime.textContent = timeStr;
 
     if (hadirLiveTime) {
-      const currentHms = `${hours}:${minutes}:${seconds}`;
       const isPast830 = currentHms > '08:30:00';
       const infoHadirCard = document.getElementById('section-info-hadir');
       const infoHadirDesc = infoHadirCard ? infoHadirCard.querySelector('p:nth-child(2)') : null;
@@ -683,7 +987,7 @@ function startLiveClockAndGreeting() {
       if (isPast830) {
         hadirLiveTime.innerHTML = `${currentHms} WIB <span class="ml-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-300">Terlambat</span>`;
         hadirLiveTime.className = 'font-mono text-xs sm:text-sm font-extrabold text-amber-800 ml-1';
-        if (infoHadirDesc) infoHadirDesc.textContent = 'Waktu presensi telah melewati pukul 08:30:00 WIB, kehadiran akan otomatis tercatat sebagai Terlambat.';
+        if (infoHadirDesc) infoHadirDesc.textContent = 'Waktu server telah melewati pukul 08:30:00 WIB, kehadiran akan otomatis tercatat sebagai Terlambat.';
         if (infoHadirCard) {
           infoHadirCard.className = 'p-4 bg-amber-50/90 border border-amber-300 rounded-2xl flex items-center space-x-3.5 transition';
         }
@@ -693,7 +997,7 @@ function startLiveClockAndGreeting() {
       } else {
         hadirLiveTime.innerHTML = `${currentHms} WIB <span class="ml-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-300">Tepat Waktu</span>`;
         hadirLiveTime.className = 'font-mono text-xs sm:text-sm font-extrabold text-emerald-800 ml-1';
-        if (infoHadirDesc) infoHadirDesc.textContent = 'Jam presensi kehadiran disesuaikan secara real-time saat Anda menekan tombol Simpan di bawah.';
+        if (infoHadirDesc) infoHadirDesc.textContent = 'Jam presensi kehadiran diambil langsung dari server secara real-time saat Anda menekan tombol Simpan.';
         if (infoHadirCard) {
           infoHadirCard.className = 'p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-center space-x-3.5 transition';
         }
@@ -704,7 +1008,7 @@ function startLiveClockAndGreeting() {
     }
 
     if (greetingEl) {
-      const h = now.getHours();
+      const h = parseInt(currentHms.slice(0, 2), 10);
       let greeting = 'Selamat Datang, Tim HR! 👋';
       if (h >= 4 && h < 11) {
         greeting = 'Selamat Pagi, Tim HR! 🌅';
@@ -801,14 +1105,34 @@ function switchTab(tab) {
     }
   });
 
-  // Ensure presensi form visibility matches role requirement:
-  // "untuk admin menampilkan semua fitur kecuali fitur absen, hanya ada tabel daftar karyawan yang sudah absen hadir dan pulang"
+  // Ensure presensi form, summary KPI cards, and table visibility matches role requirement:
+  // Karyawan: Hanya fitur absen saja (sembunyikan KPI cards & tabel)
+  // Admin: Tampilkan semua kecuali fitur absen (tampilkan KPI cards & tabel)
   const presensiForms = document.getElementById('presensi-forms-container');
+  const presensiSummaryCards = document.getElementById('presensi-summary-cards');
+  const presensiTableContainer = document.getElementById('presensi-table-container');
+
   if (presensiForms) {
     if (isKaryawan) {
       presensiForms.classList.remove('hidden');
     } else {
       presensiForms.classList.add('hidden');
+    }
+  }
+
+  if (presensiSummaryCards) {
+    if (isKaryawan) {
+      presensiSummaryCards.classList.add('hidden');
+    } else {
+      presensiSummaryCards.classList.remove('hidden');
+    }
+  }
+
+  if (presensiTableContainer) {
+    if (isKaryawan) {
+      presensiTableContainer.classList.add('hidden');
+    } else {
+      presensiTableContainer.classList.remove('hidden');
     }
   }
 
@@ -824,8 +1148,11 @@ function switchTab(tab) {
   if (tab === 'presensi') {
     populatePresensiDropdowns();
     populatePulangDropdown();
-    fetchPresensiTodaySummary();
-    fetchPresensi(1);
+    if (!isKaryawan) {
+      fetchPresensiTodaySummary();
+      fetchPresensi(1);
+    }
+    detectGPSLocation(false);
     const formTgl = document.getElementById('form-presensi-input-tanggal');
     if (formTgl && !formTgl.value) {
       formTgl.value = new Date().toISOString().slice(0, 10);
@@ -835,9 +1162,7 @@ function switchTab(tab) {
   }
 }
 
-// ==========================================
 // 1. STATISTIK & METRIK (DASHBOARD)
-// ==========================================
 
 async function fetchStats() {
   try {
@@ -868,7 +1193,7 @@ async function fetchStats() {
     const deptStrip = document.getElementById('quick-dept-strip');
     if (deptStrip) {
       if (!stats.departemenDistribusi || stats.departemenDistribusi.length === 0) {
-        deptStrip.innerHTML = '<span class="text-xs text-slate-400 italic">Belum ada data divisi. Silakan tambahkan karyawan baru.</span>';
+        deptStrip.innerHTML = '<span class="text-xs text-slate-500 italic">Belum ada data divisi. Silakan tambahkan karyawan baru.</span>';
       } else {
         deptStrip.innerHTML = stats.departemenDistribusi.map(d => {
           let icon = 'fa-briefcase';
@@ -927,11 +1252,11 @@ function renderCharts(stats) {
         datasets: [{
           data: data,
           backgroundColor: [
-            '#2563eb', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#475569'
+            '#1d4ed8', '#0284c7', '#0f766e', '#d97706', '#475569', '#6366f1', '#334155'
           ],
-          borderWidth: 3,
+          borderWidth: 2,
           borderColor: '#ffffff',
-          hoverOffset: 6
+          hoverOffset: 4
         }]
       },
       options: {
@@ -964,8 +1289,8 @@ function renderCharts(stats) {
         datasets: [{
           label: 'Jumlah Karyawan',
           data: data,
-          backgroundColor: ['#2563eb', '#0d9488', '#9333ea'],
-          borderRadius: 10,
+          backgroundColor: ['#1d4ed8', '#0284c7', '#475569'],
+          borderRadius: 8,
           borderSkipped: false
         }]
       },
@@ -991,9 +1316,7 @@ function renderCharts(stats) {
   }
 }
 
-// ==========================================
 // 2. DATA KARYAWAN (CRUD & TABEL)
-// ==========================================
 
 async function fetchKaryawan(page = currentPage) {
   currentPage = page;
@@ -1002,7 +1325,7 @@ async function fetchKaryawan(page = currentPage) {
 
   tbody.innerHTML = `
     <tr>
-      <td colspan="8" class="text-center py-12 text-slate-400">
+      <td colspan="8" class="text-center py-12 text-slate-500">
         <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-600"></i>
         <p class="text-xs font-medium">Memuat data karyawan...</p>
       </td>
@@ -1135,12 +1458,12 @@ function renderTable(data, pagination) {
 
     // Avatar with status ring
     const avatarHtml = item.foto 
-      ? `<img src="/uploads/${item.foto}" alt="${item.nama}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-sm shrink-0">`
-      : `<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-700 to-indigo-700 text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-sm">${initial}</div>`;
+      ? `<img src="/uploads/${item.foto}" alt="${item.nama}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-2xs shrink-0">`
+      : `<div class="w-10 h-10 rounded-lg bg-blue-700 text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-2xs">${initial}</div>`;
 
     return `
       <tr class="hover:bg-slate-50/80 transition duration-150 group">
-        <td class="py-3.5 px-4 text-center font-bold text-slate-400 text-xs">${no}</td>
+        <td class="py-3.5 px-4 text-center font-bold text-slate-500 text-xs">${no}</td>
         
         <!-- Karyawan Profile & NIK -->
         <td class="py-3.5 px-4">
@@ -1153,10 +1476,10 @@ function renderTable(data, pagination) {
               <div class="font-extrabold text-slate-900 group-hover:text-blue-600 cursor-pointer transition flex items-center space-x-1.5" onclick="openModalDetail(${item.id})">
                 <span>${escapeHtml(item.nama)}</span>
               </div>
-              <div class="flex items-center space-x-2 text-xs text-slate-400 mt-1">
+              <div class="flex items-center space-x-2 text-xs text-slate-500 mt-1">
                 <span class="font-mono whitespace-nowrap bg-slate-100 px-2 py-0.5 rounded-md text-[11px] text-slate-700 font-bold border border-slate-200/80 shadow-2xs">${item.nik}</span>
                 <span>&bull;</span>
-                <span class="truncate max-w-[170px] text-[11px] text-slate-500 font-medium">${escapeHtml(item.email)}</span>
+                <span class="truncate max-w-[170px] text-[11px] text-slate-600 font-medium">${escapeHtml(item.email)}</span>
               </div>
             </div>
           </div>
@@ -1180,7 +1503,7 @@ function renderTable(data, pagination) {
 
         <!-- Tanggal Masuk -->
         <td class="py-3.5 px-4 text-xs font-medium text-slate-600 whitespace-nowrap">
-          <i class="fa-regular fa-calendar text-slate-400 mr-1 text-[11px]"></i>${formatDateIndo(item.tanggal_masuk)}
+          <i class="fa-regular fa-calendar text-slate-500 mr-1 text-[11px]"></i>${formatDateIndo(item.tanggal_masuk)}
         </td>
 
         <!-- Gaji Pokok -->
@@ -1728,9 +2051,7 @@ function printIdCard() {
   window.print();
 }
 
-// ==========================================
 // 3. FITUR PRESENSI & ABSENSI KARYAWAN
-// ==========================================
 
 let currentPresensiKaryawanList = [];
 
@@ -1815,6 +2136,7 @@ function handleSearchKaryawanByIdCard(val) {
 
 // Fetch Today's Presensi Summary KPIs
 async function fetchPresensiTodaySummary() {
+  if (currentAuthUser && currentAuthUser.role === 'KARYAWAN') return;
   try {
     const res = await fetch('/api/presensi/today');
     const json = await res.json();
@@ -1877,6 +2199,7 @@ async function fetchPresensiTodaySummary() {
 
 // Fetch Presensi Table with Filters
 async function fetchPresensi(page = currentPresensiPage) {
+  if (currentAuthUser && currentAuthUser.role === 'KARYAWAN') return;
   currentPresensiPage = page;
   const tbody = document.getElementById('table-presensi-body');
   if (!tbody) return;
@@ -1931,6 +2254,37 @@ async function fetchPresensi(page = currentPresensiPage) {
   }
 }
 
+// Helper render badge lokasi kehadiran GPS
+function renderPresensiLocationBadge(item) {
+  if (item.status === 'Izin' || item.status === 'Sakit') {
+    return `<span class="inline-flex items-center text-slate-600 font-medium text-[11px]"><i class="fa-solid fa-house-user mr-1 text-[10px]"></i>Daring / Izin</span>`;
+  }
+  if (!item.status_lokasi) {
+    return `<span class="text-slate-300 font-mono text-xs">-</span>`;
+  }
+  const isOffice = item.status_lokasi === 'Di Kantor';
+  const distStr = item.jarak_meter != null ? `${Math.round(item.jarak_meter)}m` : '';
+  const badgeCls = isOffice 
+    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+    : 'bg-amber-50 text-amber-700 border-amber-200';
+  const icon = isOffice ? 'fa-building-circle-check' : 'fa-location-crosshairs';
+  const label = isOffice ? `Di Kantor ${distStr ? `(${distStr})` : ''}` : `Luar Kantor ${distStr ? `(${distStr})` : ''}`;
+
+  let mapLink = '';
+  if (item.latitude && item.longitude) {
+    mapLink = `<a href="https://maps.google.com/?q=${item.latitude},${item.longitude}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-[10px] text-blue-600 hover:text-blue-800 hover:underline mt-0.5" title="Buka Koordinat GPS di Google Maps"><i class="fa-solid fa-map-pin mr-1 text-[9px]"></i>Peta GPS</a>`;
+  }
+
+  return `
+    <div class="flex flex-col items-start space-y-0.5">
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${badgeCls}">
+        <i class="fa-solid ${icon} mr-1 text-[10px]"></i> ${label}
+      </span>
+      ${mapLink}
+    </div>
+  `;
+}
+
 // Render Presensi Table Rows
 function renderPresensiTable(data, pagination) {
   const tbody = document.getElementById('table-presensi-body');
@@ -1939,12 +2293,12 @@ function renderPresensiTable(data, pagination) {
   if (data.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-14 text-slate-400">
+        <td colspan="9" class="text-center py-14 text-slate-500">
           <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mx-auto mb-2.5">
             <i class="fa-solid fa-clipboard-user"></i>
           </div>
           <h4 class="text-sm font-bold text-slate-700">Belum Ada Catatan Presensi</h4>
-          <p class="text-xs text-slate-400 mt-1">Gunakan panel di atas untuk melakukan Absen Masuk atau ajukan Izin/Sakit.</p>
+          <p class="text-xs text-slate-500 mt-1">Gunakan panel di atas untuk melakukan Absen Masuk atau ajukan Izin/Sakit.</p>
         </td>
       </tr>
     `;
@@ -1987,7 +2341,7 @@ function renderPresensiTable(data, pagination) {
 
     return `
       <tr class="hover:bg-slate-50/70 transition">
-        <td class="py-3 px-4 text-center font-bold text-slate-400 text-xs">${no}</td>
+        <td class="py-3 px-4 text-center font-bold text-slate-500 text-xs">${no}</td>
         
         <!-- Karyawan -->
         <td class="py-3 px-4">
@@ -1995,7 +2349,7 @@ function renderPresensiTable(data, pagination) {
             ${fotoHtml}
             <div>
               <p class="font-extrabold text-slate-900 text-xs sm:text-sm">${escapeHtml(item.nama)}</p>
-              <div class="flex items-center space-x-1.5 text-[11px] text-slate-400">
+              <div class="flex items-center space-x-1.5 text-[11px] text-slate-500">
                 <span class="font-mono font-bold text-slate-600">${item.nik}</span>
                 <span>&bull;</span>
                 <span>${escapeHtml(item.departemen || '-')}</span>
@@ -2006,7 +2360,7 @@ function renderPresensiTable(data, pagination) {
 
         <!-- Tanggal -->
         <td class="py-3 px-4 whitespace-nowrap text-xs font-bold text-slate-700">
-          <i class="fa-regular fa-calendar text-slate-400 mr-1"></i>${formatDateIndo(item.tanggal)}
+          <i class="fa-regular fa-calendar text-slate-500 mr-1"></i>${formatDateIndo(item.tanggal)}
         </td>
 
         <!-- Jam Masuk -->
@@ -2032,6 +2386,11 @@ function renderPresensiTable(data, pagination) {
           ${statusBadge}
         </td>
 
+        <!-- Lokasi Kehadiran (GPS Geofencing) -->
+        <td class="py-3 px-4 text-xs whitespace-nowrap">
+          ${renderPresensiLocationBadge(item)}
+        </td>
+
         <!-- Keterangan & Metode / Bukti -->
         <td class="py-3 px-4 text-xs">
           <p class="text-slate-700 font-medium truncate max-w-xs">${
@@ -2042,7 +2401,7 @@ function renderPresensiTable(data, pagination) {
                 : escapeHtml(item.keterangan || item.status)
           }</p>
           <div class="flex items-center space-x-2 mt-1">
-            <span class="text-[10px] text-slate-400 font-medium">${escapeHtml(item.metode || 'Sistem')}</span>
+            <span class="text-[10px] text-slate-500 font-medium">${escapeHtml(item.metode || 'Sistem')}</span>
             ${item.bukti_foto ? `
               <button type="button" onclick="viewBuktiFoto('/uploads/${item.bukti_foto}')" class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-[10px] font-bold transition shadow-2xs">
                 <i class="fa-solid fa-file-medical text-[10px] text-rose-600"></i>
@@ -2139,9 +2498,7 @@ function debouncePresensiSearch() {
   }, 350);
 }
 
-// ==========================================
 // FORMULIR PRESENSI & PERIZINAN KARYAWAN
-// ==========================================
 
 let currentTodayAttendees = [];
 
@@ -2335,6 +2692,14 @@ async function handleFormPresensiSubmit(e) {
       }
       formData.append('status', submitStatus);
       formData.append('keterangan', submitKeterangan);
+
+      // Verifikasi Lokasi GPS (Geofencing) jika terdeteksi
+      const latInput = document.getElementById('presensi-lat');
+      const lngInput = document.getElementById('presensi-lng');
+      const locInput = document.getElementById('presensi-lokasi-text');
+      if (latInput && latInput.value) formData.append('latitude', latInput.value);
+      if (lngInput && lngInput.value) formData.append('longitude', lngInput.value);
+      if (locInput && locInput.value) formData.append('lokasi', locInput.value);
     } else if (status === 'Izin') {
       formData.append('status', 'Izin');
       formData.append('keterangan', keteranganIzin.trim());
@@ -2362,7 +2727,6 @@ async function handleFormPresensiSubmit(e) {
       showConfirmButton: false
     });
 
-    // Reset Form
     form.reset();
     clearBuktiFoto();
     const hadirRadio = form.querySelector('input[name="presensi_status"][value="Hadir"]');
@@ -2410,9 +2774,7 @@ async function handleFormPresensiSubmit(e) {
   }
 }
 
-// ==========================================
 // PENCATATAN ABSEN PULANG (TERPISAH SETELAH HADIR)
-// ==========================================
 
 // Populate Dropdown & Datalist Absen Pulang (Hadir/Terlambat hari ini dan belum pulang)
 async function populatePulangDropdown() {
@@ -2486,7 +2848,7 @@ async function populatePulangDropdown() {
       !e.jam_pulang
     );
 
-    // Populate datalist for Absen Pulang
+    // Update Absen Pulang datalist
     if (datalist) {
       datalist.innerHTML = currentTodayAttendees.map(e => 
         `<option value="${e.nik}">${escapeHtml(e.nama)} - Masuk ${e.jam_masuk || '-'}</option>`
@@ -2600,10 +2962,16 @@ async function handleAbsenPulangSubmit() {
   }
 
   try {
+    const payload = { karyawan_id: karyawanId };
+    if (currentGPSLocation) {
+      payload.latitude = currentGPSLocation.latitude;
+      payload.longitude = currentGPSLocation.longitude;
+    }
+
     const res = await fetch('/api/presensi/pulang', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ karyawan_id: karyawanId })
+      body: JSON.stringify(payload)
     });
 
     const json = await res.json();
@@ -2761,10 +3129,16 @@ async function handleAbsenPulang() {
   }
 
   try {
+    const payload = { karyawan_id: karyawanId };
+    if (currentGPSLocation) {
+      payload.latitude = currentGPSLocation.latitude;
+      payload.longitude = currentGPSLocation.longitude;
+    }
+
     const res = await fetch('/api/presensi/pulang', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ karyawan_id: karyawanId })
+      body: JSON.stringify(payload)
     });
 
     const json = await res.json();
@@ -2982,9 +3356,7 @@ function deletePresensi(id, nama, tanggal) {
   });
 }
 
-// ==========================================
 // 4. UTILITIES & HELPER FUNCTIONS
-// ==========================================
 
 // Format Currency to Indonesian Rupiah
 function formatRupiah(val) {

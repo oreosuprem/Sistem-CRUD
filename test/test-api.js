@@ -22,10 +22,17 @@ console.log('Stats Check: Total =', statsTotal.total, ', Aktif =', aktifRow.tota
 const presensiCount = db.prepare('SELECT COUNT(*) as count FROM presensi').get();
 console.log('Current presensi records count:', presensiCount.count);
 
-// Test insert & delete presensi with bukti_foto
+// 5. Office Location & GPS Verification Check
+const office = db.prepare('SELECT * FROM office_location LIMIT 1').get();
+if (!office || !office.latitude || !office.longitude) {
+  throw new Error('Default office location not configured!');
+}
+console.log(`Office Location verified: ${office.nama_kantor} (${office.latitude}, ${office.longitude}) radius ${office.radius_meter}m`);
+
+// Test insert & delete presensi with bukti_foto and GPS fields
 const testInsert = db.prepare(`
-  INSERT INTO presensi (karyawan_id, tanggal, jam_masuk, status, keterangan, metode, bukti_foto)
-  VALUES (1, '2026-11-20', NULL, 'Sakit', 'Demam tinggi', 'Formulir Sakit', 'test-surat-dokter.jpg')
+  INSERT INTO presensi (karyawan_id, tanggal, jam_masuk, status, keterangan, metode, bukti_foto, latitude, longitude, lokasi, jarak_meter, status_lokasi)
+  VALUES (1, '2026-11-20', '08:15:00', 'Hadir', 'Tepat Waktu', 'Web GPS', 'test-surat-dokter.jpg', -6.3148979, 106.8382681, 'Kantor Aero Lenteng Agung', 15.5, 'Di Kantor')
 `).run();
 console.log('Test Presensi inserted ID:', testInsert.lastInsertRowid);
 
@@ -33,7 +40,10 @@ const testRow = db.prepare('SELECT * FROM presensi WHERE id = ?').get(testInsert
 if (!testRow || testRow.bukti_foto !== 'test-surat-dokter.jpg') {
   throw new Error('Gagal memverifikasi kolom bukti_foto pada tabel presensi!');
 }
-console.log('Bukti Foto column verified:', testRow.bukti_foto);
+if (testRow.status_lokasi !== 'Di Kantor' || testRow.jarak_meter !== 15.5) {
+  throw new Error('Gagal memverifikasi kolom lokasi dan jarak GPS pada tabel presensi!');
+}
+console.log('Bukti Foto and GPS columns verified:', testRow.status_lokasi, `(${testRow.jarak_meter}m)`);
 
 // Cleanup test row
 db.prepare('DELETE FROM presensi WHERE id = ?').run(testInsert.lastInsertRowid);

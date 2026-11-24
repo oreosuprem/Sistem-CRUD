@@ -51,14 +51,12 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=2.3">
+  <link rel="stylesheet" href="css/style.css?v=3.1">
 </head>
 
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen font-sans selection:bg-blue-600 selection:text-white">
 
-  <!-- =========================================================================
-       1. LOGIN & REGISTER VIEW (MATCHING USER REFERENCE IMAGE 1)
-       ========================================================================= -->
+  <!-- 1. LOGIN & REGISTER VIEW (Modern Corporate Tech) -->
   <div id="login-view"
     class="fixed inset-0 z-[100] login-bg-pattern flex flex-col justify-between p-4 sm:p-6 overflow-y-auto min-h-screen">
 
@@ -66,171 +64,171 @@
     <div class="w-full flex justify-between items-center py-2 px-2 sm:px-6">
       <div class="flex items-center space-x-2.5">
         <div
-          class="w-9 h-9 rounded-xl bg-[#1d72e8] text-white flex items-center justify-center font-black text-sm shadow-md">
+          class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
           AC</div>
         <div>
           <span class="text-white font-extrabold text-sm tracking-tight">Aero<span
-              class="text-sky-400">Corporation</span></span>
-          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Human Resources Portal</p>
+              class="text-blue-400">Corporation</span></span>
+          <p class="text-[9px] text-slate-300 font-bold uppercase tracking-wider">Human Resources Portal</p>
         </div>
       </div>
-      <div class="text-[11px] text-slate-400 font-medium hidden sm:block">Sistem Manajemen Terintegrasi</div>
+      <div class="text-[11px] text-slate-300 font-medium hidden sm:block">Sistem Manajemen Terintegrasi</div>
     </div>
 
     <!-- Centered Login Box -->
     <div class="max-w-md w-full mx-auto my-auto py-8">
 
-      <!-- Title: Login (Matching Image 1) -->
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white text-left tracking-tight mb-6">Login</h1>
+      <div class="bg-white rounded-xl p-6 sm:p-8 shadow-xl border border-slate-200">
+        <!-- Title & Subtitle -->
+        <div class="mb-6">
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">Masuk ke Portal</h1>
+          <p class="text-xs text-slate-600 mt-1">Gunakan akun resmi Aero Corporation untuk mengakses sistem.</p>
+        </div>
 
-      <!-- Segmented Control [ Login ] [ Register ] -->
-      <div class="bg-[#162744] p-1 rounded-2xl flex items-center mb-6 border border-slate-700/60 shadow-inner">
-        <button id="tab-btn-login" type="button" onclick="switchAuthTab('login')"
-          class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-[#0284c7] transition duration-200 shadow-md">
-          Login
-        </button>
-        <button id="tab-btn-register" type="button" onclick="switchAuthTab('register')"
-          class="flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-slate-400 hover:text-white transition duration-200">
-          Register
-        </button>
+        <!-- Segmented Control [ Login ] [ Register ] -->
+        <div class="bg-slate-100 p-1 rounded-lg flex items-center mb-5 border border-slate-200">
+          <button id="tab-btn-login" type="button" onclick="switchAuthTab('login')"
+            class="flex-1 py-2 rounded-md font-bold text-xs sm:text-sm text-slate-900 bg-white shadow-xs transition duration-150">
+            Login
+          </button>
+          <button id="tab-btn-register" type="button" onclick="switchAuthTab('register')"
+            class="flex-1 py-2 rounded-md font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition duration-150">
+            Register
+          </button>
+        </div>
+
+        <!-- Form Login -->
+        <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Username atau Email
+            </label>
+            <input type="text" id="login-username" required
+              placeholder="admin atau email (misal: armanto@aerocorp.co.id)" value="admin"
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Password
+            </label>
+            <input type="password" id="login-password" required
+              placeholder="Password admin atau ID Card (misal: AC000X)" value="admin"
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+          </div>
+
+          <div class="flex justify-between items-center pt-0.5 text-xs">
+            <span class="text-slate-500 text-[11px]">Karyawan: password = ID Card</span>
+            <a href="javascript:void(0)" onclick="handleForgotPassword()"
+              class="text-blue-600 hover:text-blue-800 font-semibold transition hover:underline">
+              Lupa Password?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="btn-login-submit"
+            class="w-full py-2.5 px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm tracking-wide shadow-sm shadow-blue-600/20 transition active:scale-[0.98] flex items-center justify-center space-x-2 mt-4">
+            <span>Masuk Sekarang</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+
+          <!-- Informasi Akses Login 2 Akun -->
+          <div class="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-left text-xs space-y-1">
+            <div class="flex items-center text-slate-800 font-bold text-[11px]">
+              <i class="fa-solid fa-shield-halved text-blue-600 mr-1.5"></i> Panduan Hak Akses:
+            </div>
+            <div class="text-slate-600 text-[11px] leading-relaxed">
+              <span class="font-bold text-slate-900">&bull; Admin:</span> Username: <code
+                class="bg-white border border-slate-200 px-1 py-0.5 rounded text-blue-700 font-bold">admin</code> &bull;
+              Password: <code
+                class="bg-white border border-slate-200 px-1 py-0.5 rounded text-blue-700 font-bold">admin</code>
+            </div>
+            <div class="text-slate-600 text-[11px] leading-relaxed">
+              <span class="font-bold text-slate-900">&bull; Karyawan:</span> Email resmi &bull; Password: ID Card (<code
+                class="bg-white border border-slate-200 px-1 py-0.5 rounded text-slate-800 font-bold">AC000X</code>)
+            </div>
+          </div>
+        </form>
+
+        <!-- Form Register -->
+        <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-3.5 hidden">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Nama Lengkap
+            </label>
+            <input type="text" id="reg-nama" required placeholder="Contoh: Budi Santoso"
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Username
+            </label>
+            <input type="text" id="reg-username" required placeholder="budi.santoso"
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Email Perusahaan
+            </label>
+            <input type="email" id="reg-email" required placeholder="budi@aerocorp.co.id"
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Password
+            </label>
+            <input type="password" id="reg-password" required placeholder="Buat kata sandi..."
+              class="w-full px-3.5 py-2.5 bg-slate-50 text-slate-900 border border-slate-300 rounded-lg font-semibold text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 transition">
+          </div>
+
+          <button type="submit" id="btn-reg-submit"
+            class="w-full py-2.5 px-5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm tracking-wide shadow-sm shadow-blue-600/20 transition active:scale-[0.98] flex items-center justify-center space-x-2 mt-4">
+            <span>Daftar Akun Baru</span>
+          </button>
+        </form>
       </div>
-
-      <!-- Form Login -->
-      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-            USERNAME ATAU EMAIL
-          </label>
-          <input type="text" id="login-username" required placeholder="admin atau email (misal: armanto@aerocorp.co.id)" value="admin"
-            class="w-full px-4 py-3 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-            PASSWORD
-          </label>
-          <input type="password" id="login-password" required placeholder="Password admin atau ID Card (misal: AC0003)" value="admin"
-            class="w-full px-4 py-3 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition tracking-widest">
-        </div>
-
-        <div class="flex justify-between items-center pt-0.5 text-xs">
-          <span class="text-slate-400 text-[11px]">Karyawan: password = ID Card</span>
-          <a href="javascript:void(0)" onclick="handleForgotPassword()"
-            class="text-sky-400 hover:text-sky-300 transition hover:underline">
-            Forgot Password?
-          </a>
-        </div>
-
-        <!-- Submit Button (Matching Image 1) -->
-        <button type="submit" id="btn-login-submit"
-          class="w-full py-3.5 px-6 rounded-full bg-[#006097] hover:bg-[#0070b0] text-white font-extrabold text-sm tracking-wide shadow-lg shadow-sky-900/40 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2 mt-4">
-          <span>Login</span>
-        </button>
-
-        <!-- Informasi Akses Login 2 Akun -->
-        <div class="mt-4 p-3.5 rounded-2xl bg-[#0f1d33] border border-slate-700/80 text-left text-xs space-y-1.5 shadow-inner">
-          <div class="flex items-center text-sky-400 font-bold text-[11px] uppercase tracking-wider">
-            <i class="fa-solid fa-shield-halved mr-1.5"></i> Panduan Hak Akses Login:
-          </div>
-          <div class="text-slate-300 text-[11px] leading-relaxed">
-            <span class="font-bold text-emerald-400">&bull; Akun Admin:</span> Username: <code class="bg-slate-800 px-1 py-0.5 rounded text-sky-300">admin</code> &bull; Password: <code class="bg-slate-800 px-1 py-0.5 rounded text-sky-300">admin</code>
-          </div>
-          <div class="text-slate-300 text-[11px] leading-relaxed">
-            <span class="font-bold text-amber-400">&bull; Akun Karyawan:</span> Email resmi (contoh: <code class="bg-slate-800 px-1 py-0.5 rounded text-amber-300">armanto@aerocorp.co.id</code>) &bull; Password: ID Card (<code class="bg-slate-800 px-1 py-0.5 rounded text-amber-300">AC0003</code>)
-          </div>
-        </div>
-
-        <p class="text-center text-xs text-slate-400 mt-5">
-          Don't have an account?
-          <a href="javascript:void(0)" onclick="switchAuthTab('register')"
-            class="text-sky-400 font-bold hover:underline">
-            Register Now
-          </a>
-        </p>
-      </form>
-
-      <!-- Form Register -->
-      <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-3.5 hidden">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-            NAMA LENGKAP
-          </label>
-          <input type="text" id="reg-nama" required placeholder="Contoh: Budi Santoso"
-            class="w-full px-4 py-2.5 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-            USERNAME
-          </label>
-          <input type="text" id="reg-username" required placeholder="budi.santoso"
-            class="w-full px-4 py-2.5 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-            EMAIL
-          </label>
-          <input type="email" id="reg-email" required placeholder="budi@aerocorp.co.id"
-            class="w-full px-4 py-2.5 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-            PASSWORD
-          </label>
-          <input type="password" id="reg-password" required placeholder="Buat kata sandi..."
-            class="w-full px-4 py-2.5 bg-white text-slate-800 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm transition">
-        </div>
-
-        <button type="submit" id="btn-reg-submit"
-          class="w-full py-3 px-6 rounded-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-extrabold text-sm tracking-wide shadow-lg shadow-sky-900/40 transition-all transform active:scale-[0.98] flex items-center justify-center space-x-2 mt-4">
-          <span>Daftar Akun Baru</span>
-        </button>
-
-        <p class="text-center text-xs text-slate-400 mt-4">
-          Already have an account?
-          <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-sky-400 font-bold hover:underline">
-            Login Now
-          </a>
-        </p>
-      </form>
     </div>
 
-    <!-- Bottom Footer (Matching Image 1) -->
+    <!-- Bottom Footer -->
     <div
-      class="w-full flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-400 gap-2 py-2 px-2 sm:px-6">
+      class="w-full flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-300 gap-2 py-2 px-2 sm:px-6">
       <a href="javascript:void(0)"
-        onclick="Swal.fire({ title: 'Syarat & Ketentuan', text: 'Sistem Informasi Manajemen SDM & Presensi Aero Corporation dilindungi hak cipta © 2026.', icon: 'info', confirmButtonColor: '#0284c7' })"
-        class="hover:text-slate-300 transition">
+        onclick="Swal.fire({ title: 'Syarat & Ketentuan', text: 'Sistem Informasi Manajemen SDM & Presensi Aero Corporation dilindungi hak cipta © 2026.', icon: 'info', confirmButtonColor: '#2563eb' })"
+        class="hover:text-white transition">
         Terms and Services
       </a>
-      <span>Have a problem? Contact us at support@aerocorp.co.id</span>
+      <span>Butuh bantuan? Hubungi support@aerocorp.co.id</span>
     </div>
 
   </div>
 
-  <!-- =========================================================================
-       2. MAIN APPLICATION LAYOUT (ACTIVE UPON LOGIN)
-       ========================================================================= -->
+  <!-- 2. MAIN APPLICATION LAYOUT (ACTIVE UPON LOGIN) -->
   <div id="app-layout" class="min-h-screen flex flex-col md:flex-row w-full hidden">
 
     <!-- Mobile Top Bar (Clean, without redundant buttons) -->
     <div
       class="md:hidden bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
       <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 rounded-xl bg-[#1d72e8] flex items-center justify-center text-white shadow-md">
+        <div class="w-9 h-9 rounded-lg bg-blue-700 flex items-center justify-center text-white shadow-xs">
           <i class="fa-solid fa-shapes text-sm"></i>
         </div>
         <div>
           <span class="text-base font-extrabold tracking-tight text-slate-900">Aero<span
               class="text-blue-600">Corp</span></span>
-          <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Aero Corporation</p>
+          <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Aero Corporation</p>
         </div>
       </div>
-      <div>
-        <button onclick="toggleMobileSidebar()"
-          class="p-2 text-slate-600 rounded-xl border border-slate-200 bg-slate-50">
+      <div class="flex items-center space-x-2">
+        <button onclick="fetchKaryawan(1); fetchStats(); fetchPresensi(1);" aria-label="Segarkan Seluruh Data"
+          title="Segarkan Seluruh Data"
+          class="p-2 text-slate-600 hover:text-blue-600 rounded-lg border border-slate-200 bg-slate-50 transition active:scale-95">
+          <i class="fa-solid fa-arrows-rotate text-sm"></i>
+        </button>
+        <button onclick="toggleMobileSidebar()" aria-label="Buka Menu"
+          class="p-2 text-slate-600 rounded-lg border border-slate-200 bg-slate-50">
           <i class="fa-solid fa-bars text-sm"></i>
         </button>
       </div>
@@ -240,16 +238,16 @@
     <div id="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"
       class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
 
-    <!-- ================= SIDEBAR (CLEAN, COLLAPSIBLE, WITH CAPSULE WIDGET GAMBAR 2) ================= -->
-    <!-- ================= SLIM SIDEBAR (PERMANENT MINI - MATCHING USER SCREENSHOT) ================= -->
+    <!-- SIDEBAR (CLEAN, COLLAPSIBLE, WITH CAPSULE WIDGET GAMBAR 2) -->
+    <!-- SLIM SIDEBAR (PERMANENT MINI - MATCHING USER SCREENSHOT) -->
     <aside id="sidebar-container"
-      class="fixed md:sticky top-0 left-0 h-screen w-20 bg-white border-r border-slate-200/90 z-50 flex flex-col justify-between items-center py-4 transition-transform duration-200 -translate-x-full md:translate-x-0 shrink-0 shadow-sm">
+      class="fixed md:sticky top-0 left-0 h-screen w-20 bg-white border-r border-slate-200/90 z-50 flex flex-col justify-between items-center py-4 transition-transform duration-200 -translate-x-full md:translate-x-0 shrink-0 shadow-xs">
 
       <!-- Top Section: Cube Logo -->
       <div class="flex flex-col items-center w-full space-y-3">
-        <!-- 1. Blue Cube Logo (Exact match with reference) -->
+        <!-- 1. Blue Cube Logo (Clean Corporate Mark) -->
         <div
-          class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 text-white flex items-center justify-center text-xl shadow-md border border-blue-400/30 shrink-0"
+          class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center text-lg shadow-xs border border-blue-600 shrink-0"
           title="Aero Corporation">
           <i class="fa-solid fa-cube"></i>
         </div>
@@ -261,32 +259,32 @@
         <nav class="flex flex-col items-center w-full space-y-2.5 pt-1">
           <!-- Item 1: Data Karyawan -->
           <div class="nav-item-wrapper" id="nav-wrapper-karyawan">
-            <button id="sidebar-nav-karyawan" onclick="switchTab('karyawan')" title="Data Karyawan"
-              class="nav-icon-active-outer">
+            <button id="sidebar-nav-karyawan" onclick="switchTab('karyawan')" aria-label="Data Karyawan"
+              title="Data Karyawan" class="nav-icon-active-outer">
               <span class="nav-icon-active-inner"><i class="fa-solid fa-users"></i></span>
             </button>
           </div>
 
           <!-- Item 2: Presensi Karyawan -->
           <div class="nav-item-wrapper" id="nav-wrapper-presensi">
-            <button id="sidebar-nav-presensi" onclick="switchTab('presensi')" title="Presensi Karyawan"
-              class="nav-icon-inactive">
+            <button id="sidebar-nav-presensi" onclick="switchTab('presensi')" aria-label="Presensi Karyawan"
+              title="Presensi Karyawan" class="nav-icon-inactive">
               <i class="fa-solid fa-id-badge"></i>
             </button>
           </div>
 
           <!-- Item 3: Statistik & Payroll -->
           <div class="nav-item-wrapper" id="nav-wrapper-stats">
-            <button id="sidebar-nav-stats" onclick="switchTab('stats')" title="Statistik & Payroll"
-              class="nav-icon-inactive">
+            <button id="sidebar-nav-stats" onclick="switchTab('stats')" aria-label="Statistik & Payroll"
+              title="Statistik & Payroll" class="nav-icon-inactive">
               <i class="fa-solid fa-chart-pie"></i>
             </button>
           </div>
 
           <!-- Item 4: Tentang Perusahaan -->
           <div class="nav-item-wrapper" id="nav-wrapper-about">
-            <button id="sidebar-nav-about" onclick="switchTab('about')" title="Tentang Aero Corporation"
-              class="nav-icon-inactive">
+            <button id="sidebar-nav-about" onclick="switchTab('about')" aria-label="Tentang Perusahaan"
+              title="Tentang Aero Corporation" class="nav-icon-inactive">
               <i class="fa-solid fa-circle-info"></i>
             </button>
           </div>
@@ -303,7 +301,7 @@
 
           <!-- Middle Badge: ● ADM -->
           <div class="capsule-badge" title="Status Akun: Administrator">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+
             <span id="capsule-role-label">ADM</span>
           </div>
 
@@ -316,17 +314,17 @@
 
     </aside>
 
-    <!-- ================= MAIN CONTENT AREA ================= -->
+    <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col min-w-0">
 
-      <!-- ================= TOP HEADER (CLEAN: WITHOUT TAMBAH KARYAWAN BUTTON) ================= -->
+      <!-- TOP HEADER (CLEAN: WITHOUT TAMBAH KARYAWAN BUTTON) -->
       <header
         class="hidden md:block bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 transition-all">
         <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
           <!-- Left Breadcrumbs -->
           <div class="flex items-center space-x-3">
-            <div class="flex items-center space-x-2 text-xs text-slate-400">
+            <div class="flex items-center space-x-2 text-xs text-slate-500">
               <span>Portal SDM</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
               <span id="breadcrumb-title" class="font-bold text-blue-700">Data Karyawan</span>
@@ -334,7 +332,7 @@
             <span class="h-3.5 w-px bg-slate-200"></span>
             <div
               class="flex items-center space-x-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1.5"></span>
               <span>Aero Database Online</span>
             </div>
           </div>
@@ -344,17 +342,30 @@
 
             <div class="text-right hidden sm:block">
               <div id="live-clock" class="text-xs font-black text-slate-800 font-mono">--:--:-- WIB</div>
-              <p id="current-date" class="text-[11px] text-slate-400 font-medium">Memuat tanggal...</p>
+              <p id="current-date" class="text-[11px] text-slate-500 font-medium">Memuat tanggal...</p>
+              <div
+                class="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded font-semibold flex items-center gap-1 justify-end mt-0.5"
+                title="Waktu tersinkronisasi langsung dengan server (WIB), tidak dapat diakali dengan mengubah jam perangkat">
+                <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                <span>WIB Terverifikasi Server</span>
+              </div>
             </div>
+
+            <!-- Tombol Segarkan Data (Icon Only, Dekat Notifikasi) -->
+            <button id="btn-header-refresh" onclick="fetchKaryawan(1); fetchStats(); fetchPresensi(1);"
+              aria-label="Segarkan Seluruh Data"
+              class="w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-blue-600 transition shadow-2xs active:scale-95"
+              title="Segarkan Seluruh Data (Refresh)">
+              <i class="fa-solid fa-arrows-rotate text-sm"></i>
+            </button>
 
             <!-- Notification Bell Button with Red Dot (Matching Image 3) -->
             <div class="relative">
-              <button id="btn-notifications" onclick="toggleNotificationDropdown(event)"
+              <button id="btn-notifications" onclick="toggleNotificationDropdown(event)" aria-label="Notifikasi Sistem"
                 class="relative w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 transition shadow-2xs"
                 title="Pemberitahuan Sistem">
                 <i class="fa-regular fa-bell text-sm"></i>
-                <span
-                  class="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
               </button>
 
               <!-- Notification Dropdown Panel -->
@@ -370,38 +381,38 @@
               </div>
             </div>
 
-            <!-- User Avatar Circle Button (Matching Image 3) -->
+            <!-- User Avatar Circle Button -->
             <div class="relative">
-              <button id="btn-user-avatar" onclick="toggleProfileDropdown(event)"
-                class="w-9 h-9 rounded-full bg-[#1877f2] hover:bg-blue-700 text-white font-extrabold flex items-center justify-center text-sm shadow-md shadow-blue-500/25 transition hover:scale-105"
+              <button id="btn-user-avatar" onclick="toggleProfileDropdown(event)" aria-label="Menu Profil Pengguna"
+                class="w-9 h-9 rounded-full bg-blue-700 hover:bg-blue-800 text-white font-extrabold flex items-center justify-center text-sm shadow-xs transition"
                 title="Profil & Pengaturan Akun">
                 <span id="header-avatar-initial">A</span>
               </button>
 
-              <!-- Floating Profile Dropdown Card (Exact Matching Image 3) -->
+              <!-- Floating Profile Dropdown Card -->
               <div id="dropdown-profile-card"
-                class="hidden absolute right-0 mt-2.5 w-72 sm:w-80 bg-white rounded-3xl profile-dropdown-card z-50 p-4 transition-all animate-in fade-in zoom-in-95 duration-150">
+                class="hidden absolute right-0 mt-2.5 w-72 sm:w-80 bg-white rounded-xl profile-dropdown-card z-50 p-4 transition-all animate-in fade-in zoom-in-95 duration-150">
 
                 <!-- User Info Row -->
                 <div class="flex items-center space-x-3 mb-3">
                   <div
-                    class="w-11 h-11 rounded-full bg-[#1877f2] text-white flex items-center justify-center text-lg font-black shrink-0 shadow-md">
+                    class="w-10 h-10 rounded-full bg-blue-700 text-white flex items-center justify-center text-sm font-black shrink-0 shadow-xs">
                     <span id="dropdown-avatar-initial">A</span>
                   </div>
                   <div class="overflow-hidden">
                     <h4 id="dropdown-user-name" class="font-bold text-slate-900 text-sm truncate leading-tight">admin
                     </h4>
-                    <p id="dropdown-user-email" class="text-xs text-slate-400 font-medium truncate mt-0.5">
+                    <p id="dropdown-user-email" class="text-xs text-slate-500 font-medium truncate mt-0.5">
                       admin@aerocorp.co.id</p>
                   </div>
                 </div>
 
                 <!-- Access Level & Unit Box -->
-                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 mb-3 text-xs">
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-3 text-xs">
                   <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-slate-400 text-[11px] font-bold">Hak Akses</span>
+                    <span class="text-slate-500 text-[11px] font-bold">Hak Akses</span>
                     <span id="dropdown-user-role"
-                      class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/60 uppercase">
+                      class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/80 uppercase">
                       ADMIN
                     </span>
                   </div>
@@ -413,22 +424,22 @@
                 <!-- Menu Items -->
                 <div class="space-y-1 border-t border-slate-100 pt-2 text-xs font-semibold text-slate-700">
                   <button onclick="openModalChangePassword()"
-                    class="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
+                    class="w-full px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
                     <i class="fa-solid fa-key text-slate-500 w-4"></i>
                     <span>Ganti Kata Sandi</span>
                   </button>
                   <button onclick="openModalHelpGuide()"
-                    class="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
+                    class="w-full px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
                     <i class="fa-regular fa-file-lines text-slate-500 w-4"></i>
                     <span>Bantuan & Panduan Sistem</span>
                   </button>
                   <button onclick="openModalSettings()"
-                    class="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
+                    class="w-full px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center space-x-2.5 transition text-left">
                     <i class="fa-solid fa-gear text-slate-500 w-4"></i>
                     <span>Pengaturan & Export CSV</span>
                   </button>
                   <button onclick="confirmLogout()"
-                    class="w-full px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition text-left font-bold border-t border-slate-100 mt-1">
+                    class="w-full px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center space-x-2.5 transition text-left font-bold border-t border-slate-100 mt-1">
                     <i class="fa-solid fa-arrow-right-from-bracket w-4"></i>
                     <span>Keluar Akun (Logout)</span>
                   </button>
@@ -445,157 +456,124 @@
       <!-- Main Container -->
       <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- ================= HERO BANNER ================= -->
-        <section
-          class="relative overflow-hidden rounded-3xl bg-[#0f1d40] text-white p-7 sm:p-8 shadow-2xl border border-blue-900/40">
-          <div class="absolute -right-16 -top-16 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none">
-          </div>
-          <div
-            class="absolute right-60 -bottom-16 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none">
-          </div>
-
-          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-3 max-w-3xl">
-              <p class="text-xs font-bold tracking-wider uppercase text-sky-400">SISTEM INFORMASI MANAJEMEN SDM</p>
-              <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight uppercase">AERO
-                CORPORATION</h1>
-              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                Dashboard terintegrasi untuk mengelola, memantau, dan menganalisis data karyawan, informasi jabatan,
-                divisi, serta administrasi kepegawaian secara efisien dan real-time.
-              </p>
-              <div class="pt-1 flex flex-wrap items-center gap-2">
-                <span
-                  class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-slate-100 border border-white/10 shadow-sm">
-                  <i class="fa-regular fa-circle-check text-emerald-400 text-sm"></i>
-                  <span>Sistem Manajemen Karyawan Aktif</span>
-                </span>
-              </div>
+        <!-- EXECUTIVE DASHBOARD BANNER (Modern, High Contrast, Anti-Slop) -->
+        <section class="modern-card p-6 sm:p-7 bg-white border border-slate-200">
+          <div class="space-y-2 max-w-4xl">
+            <div class="flex items-center space-x-2">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                Aero Corporation
+              </span>
+              <span class="text-xs text-slate-500 font-semibold">&bull; Sistem Informasi Manajemen SDM & Presensi</span>
             </div>
-
-            <!-- Quick Action Refresh on Banner -->
-            <div class="flex items-center space-x-2.5 shrink-0 self-start md:self-center">
-              <button onclick="fetchKaryawan(1); fetchStats(); fetchPresensi(1);" title="Refresh Seluruh Data"
-                class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/15 flex items-center space-x-2 shadow-sm transition active:scale-95">
-                <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                <span>Segarkan Data</span>
-              </button>
-            </div>
+            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Pusat Data Karyawan & Administrasi Kepegawaian
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Dashboard terintegrasi untuk pengelolaan profil karyawan, struktur departemen & jabatan, absensi
+              terverifikasi GPS, serta ringkasan payroll.
+            </p>
           </div>
         </section>
 
-        <!-- ================= TAB 1: DATA KARYAWAN ================= -->
+        <!-- TAB 1: DATA KARYAWAN -->
         <div id="tab-content-karyawan" class="space-y-6">
 
-          <!-- 4 KPI Metrics -->
+          <!-- 4 KPI Metrics (Clean, Purposeful Tiles) -->
           <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Karyawan -->
-            <div
-              class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80 border-t-4 border-t-blue-600 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Karyawan</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Total Karyawan</span>
                 <div
-                  class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-blue-700 text-white flex items-center justify-center text-lg shadow-md shadow-blue-500/25 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-sm border border-blue-100">
                   <i class="fa-solid fa-users"></i>
                 </div>
               </div>
               <div class="mt-3">
-                <h3 id="stat-total" class="text-3xl font-black text-slate-900 tracking-tight font-mono">-</h3>
-                <div
-                  class="mt-2 inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                  <i class="fa-solid fa-building mr-1.5 text-[10px]"></i>
-                  <span>Aero Corporation</span>
-                </div>
+                <h3 id="stat-total" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">-
+                </h3>
+                <p class="text-xs text-slate-500 font-medium mt-1">Aero Corporation</p>
               </div>
             </div>
 
             <!-- Karyawan Aktif -->
-            <div
-              class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80 border-t-4 border-t-emerald-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Karyawan Aktif</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Karyawan Aktif</span>
                 <div
-                  class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/25 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm border border-emerald-100">
                   <i class="fa-solid fa-user-check"></i>
                 </div>
               </div>
               <div class="mt-3">
-                <h3 id="stat-aktif" class="text-3xl font-black text-emerald-600 tracking-tight font-mono">-</h3>
-                <div
-                  class="mt-2 inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                  <span>Aktif Bertugas</span>
-                </div>
+                <h3 id="stat-aktif" class="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight font-mono">-
+                </h3>
+                <p class="text-xs text-emerald-700 font-semibold mt-1">Aktif Bertugas</p>
               </div>
             </div>
 
             <!-- Sedang Cuti -->
-            <div
-              class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80 border-t-4 border-t-amber-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Sedang Cuti</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Sedang Cuti</span>
                 <div
-                  class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center text-lg shadow-md shadow-amber-500/25 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-sm border border-amber-100">
                   <i class="fa-solid fa-calendar-minus"></i>
                 </div>
               </div>
               <div class="mt-3">
-                <h3 id="stat-cuti" class="text-3xl font-black text-amber-600 tracking-tight font-mono">-</h3>
-                <div
-                  class="mt-2 inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-100">
-                  <i class="fa-solid fa-clock-rotate-left mr-1.5 text-[10px]"></i>
-                  <span>Izin Resmi HRD</span>
-                </div>
+                <h3 id="stat-cuti" class="text-2xl sm:text-3xl font-black text-amber-700 tracking-tight font-mono">-
+                </h3>
+                <p class="text-xs text-amber-700 font-semibold mt-1">Izin Resmi SDM</p>
               </div>
             </div>
 
             <!-- Program Magang -->
-            <div
-              class="kpi-card bg-white rounded-2xl p-5 border border-slate-200/80 border-t-4 border-t-purple-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Program Magang</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Program Magang</span>
                 <div
-                  class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-md shadow-purple-500/25 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-sm border border-indigo-100">
                   <i class="fa-solid fa-graduation-cap"></i>
                 </div>
               </div>
               <div class="mt-3">
-                <h3 id="stat-magang" class="text-3xl font-black text-purple-600 tracking-tight font-mono">-</h3>
-                <div
-                  class="mt-2 inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-100">
-                  <i class="fa-solid fa-award mr-1.5 text-[10px]"></i>
-                  <span>Talenta Magang</span>
-                </div>
+                <h3 id="stat-magang" class="text-2xl sm:text-3xl font-black text-indigo-700 tracking-tight font-mono">-
+                </h3>
+                <p class="text-xs text-indigo-700 font-semibold mt-1">Talenta Magang</p>
               </div>
             </div>
           </section>
 
           <!-- Bilah Distribusi Divisi -->
+          <!-- Quick Dept Filter Strip -->
           <section
-            class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center space-x-2 text-xs font-extrabold text-slate-700 shrink-0">
-              <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+            class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center space-x-2 text-xs font-bold text-slate-700 shrink-0">
+              <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-sitemap"></i>
               </div>
               <span>Divisi Aero Corp:</span>
             </div>
             <div id="quick-dept-strip" class="flex flex-wrap items-center gap-2 flex-1 sm:justify-end">
-              <span class="text-xs text-slate-400">Memuat pembagian departemen...</span>
+              <span class="text-xs text-slate-500">Memuat pembagian departemen...</span>
             </div>
           </section>
 
           <!-- Filter & Search Toolbar (With Primary Tambah Karyawan Button) -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
             <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
 
               <!-- Quick Search Input -->
               <div class="relative flex-1">
                 <i
-                  class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                  class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
                 <input type="text" id="filter-search" placeholder="Cari ID Card, nama lengkap, email, atau jabatan..."
-                  class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                  class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm placeholder:text-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
                   oninput="debounceSearch()">
                 <button type="button" id="btn-clear-search" onclick="clearSearchInput()"
-                  class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600">
                   <i class="fa-solid fa-circle-xmark"></i>
                 </button>
               </div>
@@ -603,7 +581,7 @@
               <!-- Filter Controls -->
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <select id="filter-departemen" onchange="fetchKaryawan(1)"
-                  class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Semua Departemen</option>
                   <option value="Direksi & Manajemen Eksekutif">Direksi & Manajemen Eksekutif</option>
                   <option value="Teknologi Informasi">Teknologi Informasi</option>
@@ -615,7 +593,7 @@
                 </select>
 
                 <select id="filter-status-kerja" onchange="fetchKaryawan(1)"
-                  class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Semua Status Kerja</option>
                   <option value="Aktif">Aktif</option>
                   <option value="Cuti">Cuti</option>
@@ -623,7 +601,7 @@
                 </select>
 
                 <select id="filter-status-kepegawaian" onchange="fetchKaryawan(1)"
-                  class="col-span-2 sm:col-span-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  class="col-span-2 sm:col-span-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-medium text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Semua Jenis Pegawai</option>
                   <option value="Tetap">Tetap</option>
                   <option value="Kontrak">Kontrak</option>
@@ -634,14 +612,14 @@
               <!-- Action Buttons: Reset & Dedicated Tambah Karyawan Baru Button -->
               <div class="flex items-center space-x-2">
                 <button onclick="resetFilter()" title="Reset Filter"
-                  class="px-3.5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold flex items-center space-x-1.5 transition">
+                  class="px-3.5 py-2 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold flex items-center space-x-1.5 transition">
                   <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
                   <span>Reset</span>
                 </button>
 
                 <!-- Dedicated Tambah Karyawan Button (Only in Data Karyawan Tab) -->
                 <button onclick="openModalTambah()"
-                  class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white text-xs font-bold flex items-center space-x-2 shadow-md shadow-blue-600/20 transition active:scale-95 shrink-0">
+                  class="px-4 py-2.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center space-x-2 shadow-xs transition active:scale-95 shrink-0">
                   <i class="fa-solid fa-user-plus text-xs"></i>
                   <span>Tambah Karyawan</span>
                 </button>
@@ -651,12 +629,12 @@
           </div>
 
           <!-- Data Table Card -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div
               class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/60">
               <div>
                 <h2 class="text-sm font-extrabold text-slate-900 tracking-tight">Database Karyawan Aero Corporation</h2>
-                <p id="table-info-count" class="text-xs text-slate-400">Memuat data karyawan...</p>
+                <p id="table-info-count" class="text-xs text-slate-500">Memuat data karyawan...</p>
               </div>
               <div class="flex items-center space-x-3 text-xs text-slate-500">
                 <span class="font-medium">Baris per halaman:</span>
@@ -713,8 +691,8 @@
 
         </div>
 
-        <!-- ================= TAB 2: PRESENSI & KEHADIRAN KARYAWAN ================= -->
-        <!-- ================= TAB 2: PRESENSI & KEHADIRAN KARYAWAN ================= -->
+        <!-- TAB 2: PRESENSI & KEHADIRAN KARYAWAN -->
+        <!-- TAB 2: PRESENSI & KEHADIRAN KARYAWAN -->
         <div id="tab-content-presensi" class="hidden space-y-6">
 
           <!-- Presensi Action Area: Form Absen Masuk/Izin/Sakit & Form Absen Pulang Terpisah (Khusus Karyawan) -->
@@ -722,7 +700,7 @@
 
             <!-- Card 1 (Left 2 Cols): Formulir Presensi & Perizinan (Hadir, Izin, Sakit) -->
             <section
-              class="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              class="lg:col-span-2 bg-white rounded-xl p-6 sm:p-7 border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between">
               <div>
                 <div
                   class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-slate-100 gap-3">
@@ -734,7 +712,7 @@
                     <div>
                       <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Formulir Presensi & Perizinan
                       </h3>
-                      <p class="text-xs text-slate-400">Pilih karyawan & status (Hadir, Izin, atau Sakit).</p>
+                      <p class="text-xs text-slate-500">Pilih karyawan & status (Hadir, Izin, atau Sakit).</p>
                     </div>
                   </div>
 
@@ -760,7 +738,7 @@
                           oninput="handleSearchKaryawanByIdCard(this.value)"
                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-mono font-bold uppercase text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <div
-                          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                           <i class="fa-solid fa-id-badge text-sm"></i>
                         </div>
                       </div>
@@ -786,7 +764,7 @@
                           <i class="fa-solid fa-check text-[9px] mr-1"></i> Terpilih
                         </span>
                       </div>
-                      <div id="presensi-idcard-hint" class="mt-1 text-[11px] text-slate-400 italic">
+                      <div id="presensi-idcard-hint" class="mt-1 text-[11px] text-slate-500 italic">
                         Ketik ID Card (misal: AC0001, AC0002) untuk memunculkan nama karyawan otomatis.
                       </div>
                     </div>
@@ -801,7 +779,7 @@
                     </div>
                   </div>
 
-                  <!-- 3. Pilihan Status: Hadir, Izin, Sakit (Tanpa teks sub-judul) -->
+                  <!-- 3. Pilihan Status: Hadir, Izin, Sakit -->
                   <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">
                       Pilihan Absen <span class="text-rose-500">*</span>
@@ -809,7 +787,7 @@
                     <div class="grid grid-cols-3 gap-3">
                       <!-- Opsi Hadir -->
                       <label
-                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3.5 px-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 transition">
+                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3 px-3 rounded-lg border-2 border-emerald-600 bg-emerald-50/40 transition">
                         <input type="radio" name="presensi_status" value="Hadir" checked
                           onchange="handlePresensiStatusChange()" class="text-emerald-600 focus:ring-emerald-500">
                         <span class="text-xs sm:text-sm font-bold text-slate-900">Hadir</span>
@@ -817,7 +795,7 @@
 
                       <!-- Opsi Izin -->
                       <label
-                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3.5 px-3 rounded-2xl border border-slate-200 hover:border-sky-300 hover:bg-sky-50/30 transition">
+                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3 px-3 rounded-lg border border-slate-200 hover:border-sky-300 hover:bg-sky-50/30 transition">
                         <input type="radio" name="presensi_status" value="Izin" onchange="handlePresensiStatusChange()"
                           class="text-sky-600 focus:ring-sky-500">
                         <span class="text-xs sm:text-sm font-bold text-slate-900">Izin</span>
@@ -825,7 +803,7 @@
 
                       <!-- Opsi Sakit -->
                       <label
-                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3.5 px-3 rounded-2xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 transition">
+                        class="status-radio-card cursor-pointer flex items-center justify-center space-x-2 py-3 px-3 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 transition">
                         <input type="radio" name="presensi_status" value="Sakit" onchange="handlePresensiStatusChange()"
                           class="text-rose-600 focus:ring-rose-500">
                         <span class="text-xs sm:text-sm font-bold text-slate-900">Sakit</span>
@@ -847,9 +825,50 @@
                           class="font-mono text-sm font-extrabold text-emerald-700 ml-1">--:--:-- WIB</span>
                       </p>
                       <p class="text-[11px] text-emerald-700/80 mt-0.5">
-                        Jam presensi kehadiran disesuaikan secara real-time saat Anda menekan tombol Simpan di bawah.
+                        Jam presensi diambil langsung dari server (WIB real-time). Mengubah jam di perangkat tidak akan
+                        mempengaruhi waktu presensi.
                       </p>
                     </div>
+                  </div>
+
+                  <!-- 4b. Verifikasi Lokasi Kehadiran di Kantor (GPS Geofencing) -->
+                  <div id="section-gps-hadir" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-location-dot text-blue-600"></i>
+                        <span class="text-xs font-bold text-slate-800">Verifikasi Lokasi Kantor (GPS)</span>
+                      </div>
+                      <button type="button" onclick="detectGPSLocation(true)" id="btn-detect-gps"
+                        class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 transition flex items-center gap-1.5 shadow-2xs">
+                        <i class="fa-solid fa-crosshairs"></i>
+                        <span>Cek Lokasi Saya</span>
+                      </button>
+                    </div>
+
+                    <div id="gps-status-container"
+                      class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pt-1 text-xs">
+                      <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <span id="gps-status-badge"
+                          class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700">
+                          Mendeteksi GPS...
+                        </span>
+                        <span id="gps-distance-text" class="text-[11px] text-slate-600 font-medium">
+                          Mengambil titik koordinat perangkat...
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <span id="gps-coords-display" class="text-[10px] text-slate-500 font-mono">--</span>
+                        <a id="gps-map-link" href="#" target="_blank"
+                          class="hidden text-blue-600 hover:underline text-[11px] font-medium">
+                          <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Peta
+                        </a>
+                      </div>
+                    </div>
+
+                    <!-- Hidden GPS Inputs -->
+                    <input type="hidden" id="presensi-latitude" name="latitude">
+                    <input type="hidden" id="presensi-longitude" name="longitude">
+                    <input type="hidden" id="presensi-lokasi" name="lokasi">
                   </div>
 
                   <!-- 5. Kondisi IZIN: Hanya Kolom Alasan / Keterangan -->
@@ -910,7 +929,7 @@
                   <!-- Submit Button -->
                   <div class="pt-2 flex justify-end">
                     <button type="submit" id="btn-submit-presensi-main"
-                      class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition active:scale-95 flex items-center space-x-2">
+                      class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95 flex items-center space-x-2">
                       <i class="fa-solid fa-floppy-disk"></i>
                       <span id="btn-submit-presensi-label">Simpan Kehadiran (Hadir)</span>
                     </button>
@@ -921,16 +940,16 @@
 
             <!-- Card 2 (Right 1 Col): Pencatatan Absen Pulang (Terpisah Setelah Hadir) -->
             <section
-              class="lg:col-span-1 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              class="lg:col-span-1 bg-white rounded-xl p-6 sm:p-7 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
               <div>
                 <div class="flex items-center space-x-3 pb-4 mb-5 border-b border-slate-100">
                   <div
-                    class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shadow-sm">
+                    class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-lg shadow-2xs">
                     <i class="fa-solid fa-person-walking-arrow-right"></i>
                   </div>
                   <div>
                     <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Absen Pulang</h3>
-                    <p class="text-xs text-slate-400">Check-out karyawan yang hadir</p>
+                    <p class="text-xs text-slate-500">Check-out karyawan yang hadir</p>
                   </div>
                 </div>
 
@@ -943,8 +962,8 @@
                       <input type="text" id="pulang-input-idcard" list="list-idcard-pulang"
                         placeholder="Ketik ID Card (misal: AC0001)" autocomplete="off"
                         oninput="handleSearchPulangByIdCard(this.value)"
-                        class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-mono font-bold uppercase text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs sm:text-sm font-mono font-bold uppercase text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                         <i class="fa-solid fa-id-badge text-sm"></i>
                       </div>
                     </div>
@@ -954,7 +973,7 @@
 
                   <!-- Details Card when an active attendee is selected -->
                   <div id="pulang-info-card"
-                    class="hidden p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-2.5">
+                    class="hidden p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2.5">
                     <div class="flex items-center justify-between text-xs">
                       <span class="text-slate-500 font-semibold">Jam Masuk Tadi:</span>
                       <span id="pulang-info-jam-masuk"
@@ -963,20 +982,20 @@
                     <div class="flex items-center justify-between text-xs">
                       <span class="text-slate-500 font-semibold">Jam Pulang Sekarang:</span>
                       <span id="pulang-info-jam-pulang"
-                        class="font-mono font-extrabold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-indigo-200">--:--:--
+                        class="font-mono font-extrabold text-blue-700 bg-white px-2 py-0.5 rounded-md border border-slate-200">--:--:--
                         WIB</span>
                     </div>
-                    <div class="text-[11px] text-indigo-800 font-medium pt-1 border-t border-indigo-100">
+                    <div class="text-[11px] text-slate-600 font-medium pt-1 border-t border-slate-200">
                       Waktu checkout akan disimpan secara instan sesuai jam saat ini.
                     </div>
                   </div>
 
                   <!-- Empty state when no attendee needs checkout -->
                   <div id="pulang-empty-state"
-                    class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-2xl mb-1.5"></i>
+                    class="p-4 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-2xl mb-1.5"></i>
                     <p class="text-xs font-bold text-slate-700">Semua Hadir Sudah Pulang</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Tidak ada karyawan yang menunggu checkout untuk hari
+                    <p class="text-[11px] text-slate-500 mt-0.5">Tidak ada karyawan yang menunggu checkout untuk hari
                       ini.</p>
                   </div>
                 </div>
@@ -985,7 +1004,7 @@
               <!-- Action Checkout Button -->
               <div class="pt-4 mt-4 border-t border-slate-100">
                 <button type="button" id="btn-submit-pulang" onclick="handleAbsenPulangSubmit()" disabled
-                  class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center space-x-2">
+                  class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95 flex items-center justify-center space-x-2">
                   <i class="fa-solid fa-arrow-right-from-bracket"></i>
                   <span>Catat Absen Pulang Sekarang</span>
                 </button>
@@ -994,71 +1013,72 @@
 
           </div>
 
-          <!-- 4 KPI Presensi Hari Ini -->
-          <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div
-              class="kpi-card bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 border-t-4 border-t-emerald-500 shadow-sm relative overflow-hidden group">
+          <!-- 4 KPI Presensi Hari Ini (Khusus Admin - Clean Tiles) -->
+          <section id="presensi-summary-cards" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Hadir Tepat Waktu</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Hadir Tepat Waktu</span>
                 <div
-                  class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center text-base shadow-md shadow-emerald-500/20 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm border border-emerald-100">
                   <i class="fa-solid fa-user-check"></i>
                 </div>
               </div>
-              <div class="mt-2.5">
-                <h3 id="stat-presensi-hadir" class="text-2xl sm:text-3xl font-black text-emerald-600 font-mono">0</h3>
-                <p class="text-[11px] text-emerald-600/80 font-bold mt-1">Hadir &bull; Hari ini</p>
+              <div class="mt-3">
+                <h3 id="stat-presensi-hadir"
+                  class="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight font-mono">0</h3>
+                <p class="text-xs text-emerald-700 font-semibold mt-1">Hadir &bull; Hari ini</p>
               </div>
             </div>
 
-            <div
-              class="kpi-card bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 border-t-4 border-t-amber-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Terlambat</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Terlambat</span>
                 <div
-                  class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center text-base shadow-md shadow-amber-500/20 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-sm border border-amber-100">
                   <i class="fa-solid fa-user-clock"></i>
                 </div>
               </div>
-              <div class="mt-2.5">
-                <h3 id="stat-presensi-terlambat" class="text-2xl sm:text-3xl font-black text-amber-600 font-mono">0</h3>
-                <p class="text-[11px] text-amber-600/80 font-bold mt-1">Masuk lewat 08:30</p>
+              <div class="mt-3">
+                <h3 id="stat-presensi-terlambat"
+                  class="text-2xl sm:text-3xl font-black text-amber-700 tracking-tight font-mono">0</h3>
+                <p class="text-xs text-amber-700 font-semibold mt-1">Masuk lewat 08:30</p>
               </div>
             </div>
 
-            <div
-              class="kpi-card bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 border-t-4 border-t-sky-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Izin & Sakit</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Izin & Sakit</span>
                 <div
-                  class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center text-base shadow-md shadow-sky-500/20 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center text-sm border border-sky-100">
                   <i class="fa-solid fa-envelope-open-text"></i>
                 </div>
               </div>
-              <div class="mt-2.5">
-                <h3 id="stat-presensi-izin" class="text-2xl sm:text-3xl font-black text-sky-600 font-mono">0</h3>
-                <p class="text-[11px] text-sky-600/80 font-bold mt-1">Keterangan resmi ada</p>
+              <div class="mt-3">
+                <h3 id="stat-presensi-izin"
+                  class="text-2xl sm:text-3xl font-black text-sky-700 tracking-tight font-mono">0</h3>
+                <p class="text-xs text-sky-700 font-semibold mt-1">Keterangan resmi ada</p>
               </div>
             </div>
 
-            <div
-              class="kpi-card bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 border-t-4 border-t-rose-500 shadow-sm relative overflow-hidden group">
+            <div class="kpi-tile">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Belum Presensi</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Belum Presensi</span>
                 <div
-                  class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center text-base shadow-md shadow-rose-500/20 group-hover:scale-110 transition duration-300">
+                  class="w-9 h-9 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center text-sm border border-rose-100">
                   <i class="fa-solid fa-user-xmark"></i>
                 </div>
               </div>
-              <div class="mt-2.5">
-                <h3 id="stat-presensi-belum" class="text-2xl sm:text-3xl font-black text-rose-600 font-mono">0</h3>
-                <p class="text-[11px] text-rose-600/80 font-bold mt-1">Dari karyawan aktif</p>
+              <div class="mt-3">
+                <h3 id="stat-presensi-belum"
+                  class="text-2xl sm:text-3xl font-black text-rose-700 tracking-tight font-mono">0</h3>
+                <p class="text-xs text-rose-700 font-semibold mt-1">Dari karyawan aktif</p>
               </div>
             </div>
           </section>
 
-          <!-- Tabel Log Presensi -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <!-- Tabel Log Presensi (Khusus Admin) -->
+          <div id="presensi-table-container"
+            class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div
               class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
               <div class="flex items-center space-x-2">
@@ -1066,8 +1086,9 @@
                   <i class="fa-solid fa-list-check"></i>
                 </div>
                 <div>
-                  <h3 id="presensi-table-title" class="text-sm font-extrabold text-slate-900 tracking-tight">Log & Riwayat Presensi Karyawan</h3>
-                  <p id="presensi-info-count" class="text-xs text-slate-400">Memuat catatan presensi...</p>
+                  <h3 id="presensi-table-title" class="text-sm font-extrabold text-slate-900 tracking-tight">Log &
+                    Riwayat Presensi Karyawan</h3>
+                  <p id="presensi-info-count" class="text-xs text-slate-500">Memuat catatan presensi...</p>
                 </div>
               </div>
 
@@ -1097,7 +1118,7 @@
                 </select>
 
                 <input type="text" id="filter-presensi-search" placeholder="Cari ID Card / Nama..."
-                  class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36 sm:w-44"
+                  class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36 sm:w-44"
                   oninput="debouncePresensiSearch()">
               </div>
             </div>
@@ -1114,6 +1135,7 @@
                     <th class="py-3 px-4 text-center">Jam Masuk</th>
                     <th class="py-3 px-4 text-center">Jam Pulang</th>
                     <th class="py-3 px-4 text-center">Status</th>
+                    <th class="py-3 px-4">Lokasi Kehadiran</th>
                     <th class="py-3 px-4">Keterangan & Bukti</th>
                     <th id="th-presensi-aksi" class="py-3 px-4 text-center w-24">Aksi</th>
                   </tr>
@@ -1134,17 +1156,17 @@
 
         </div>
 
-        <!-- ================= TAB 3: STATISTIK & PAYROLL ================= -->
+        <!-- TAB 3: STATISTIK & PAYROLL -->
         <div id="tab-content-stats" class="hidden space-y-6">
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+          <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
             <div
               class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
               <div>
                 <h3 class="text-base font-extrabold text-slate-900 flex items-center space-x-2">
-                  <i class="fa-solid fa-chart-pie text-blue-600"></i>
+                  <i class="fa-solid fa-chart-pie text-blue-700"></i>
                   <span>Analisis Demografi & Payroll Karyawan Aero Corp</span>
                 </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Visualisasi data karyawan dan kepegawaian secara komprehensif.
+                <p class="text-xs text-slate-500 mt-0.5">Visualisasi data karyawan dan kepegawaian secara komprehensif.
                 </p>
               </div>
               <button onclick="fetchStats()"
@@ -1155,20 +1177,20 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/50">
+              <div class="border border-slate-200 rounded-lg p-5 bg-slate-50/60">
                 <div class="flex items-center justify-between mb-4">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600">Distribusi per Departemen</h4>
-                  <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Divisi</span>
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Distribusi per Departemen</h4>
+                  <span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-md">Divisi</span>
                 </div>
                 <div class="h-64 flex items-center justify-center">
                   <canvas id="chart-departemen"></canvas>
                 </div>
               </div>
 
-              <div class="border border-slate-100 rounded-2xl p-5 bg-slate-50/50">
+              <div class="border border-slate-200 rounded-lg p-5 bg-slate-50/60">
                 <div class="flex items-center justify-between mb-4">
-                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600">Komposisi Pegawai</h4>
-                  <span class="text-[11px] font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">Status
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Komposisi Pegawai</h4>
+                  <span class="text-[11px] font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">Status
                     Kerja</span>
                 </div>
                 <div class="h-64 flex items-center justify-center">
@@ -1177,30 +1199,30 @@
               </div>
             </div>
 
+            <!-- Modern Payroll Summary Banner (Clean Executive Dark) -->
             <div
-              class="mt-6 p-6 rounded-2xl bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-800 text-white shadow-lg shadow-blue-600/20 flex flex-col sm:flex-row justify-between items-center gap-4">
+              class="mt-6 p-6 rounded-xl bg-slate-900 border border-slate-800 text-white shadow-xs flex flex-col sm:flex-row justify-between items-center gap-4">
               <div class="space-y-1 text-center sm:text-left">
                 <span
-                  class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-blue-100 uppercase tracking-wider">Payroll
-                  Estimation</span>
-                <h4 class="font-extrabold text-lg tracking-tight">Alokasi Anggaran Gaji Karyawan Aktif</h4>
-                <p class="text-xs text-blue-100/90">Dihitung otomatis dari akumulasi gaji pokok staf aktif Aero
-                  Corporation.</p>
+                  class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-blue-400 border border-slate-700 uppercase tracking-wider">
+                  Alokasi Payroll
+                </span>
+                <h4 class="font-bold text-lg tracking-tight text-white">Alokasi Anggaran Gaji Karyawan Aktif</h4>
+                <p class="text-xs text-slate-400">Dihitung otomatis dari akumulasi gaji pokok staf aktif Aero Corporation.</p>
               </div>
               <div
-                class="text-center sm:text-right bg-white/10 backdrop-blur-md px-5 py-3.5 rounded-xl border border-white/20">
-                <p class="text-[11px] uppercase tracking-wider text-blue-200 font-semibold">Total Pengeluaran Bulanan
-                </p>
+                class="text-center sm:text-right bg-slate-800/90 px-5 py-3.5 rounded-lg border border-slate-700">
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Pengeluaran Bulanan</p>
                 <h3 id="stat-total-gaji" class="text-2xl font-black text-white font-mono mt-0.5">Rp 0</h3>
-                <p id="stat-avg-gaji" class="text-xs text-blue-100 mt-1">Rata-rata: Rp 0 / orang</p>
+                <p id="stat-avg-gaji" class="text-xs text-slate-400 mt-1">Rata-rata: Rp 0 / orang</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ================= TAB 4: TENTANG PERUSAHAAN ================= -->
+        <!-- TAB 4: TENTANG PERUSAHAAN -->
         <div id="tab-content-about" class="hidden space-y-6">
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+          <div class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs">
             <div class="max-w-3xl space-y-4">
               <div
                 class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200/60">
@@ -1263,7 +1285,7 @@
       </main>
 
       <!-- Footer -->
-      <footer class="bg-white border-t border-slate-200/80 py-4 px-6 text-xs text-slate-400 mt-auto">
+      <footer class="bg-white border-t border-slate-200/80 py-4 px-6 text-xs text-slate-500 mt-auto">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
           <p>&copy; 2026 <strong class="text-slate-700 font-bold">Aero Corporation</strong>. Hak Cipta Dilindungi.</p>
           <p class="flex items-center space-x-1.5">
@@ -1278,29 +1300,26 @@
 
   </div>
 
-  <!-- =========================================================================
-       3. MODALS
-       ========================================================================= -->
+  <!-- 3. MODALS -->
 
-  <!-- ================= MODAL TAMBAH / EDIT KARYAWAN ================= -->
+  <!-- MODAL TAMBAH / EDIT KARYAWAN -->
   <div id="modal-form-karyawan"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-2xl w-full overflow-hidden transform transition-all border border-slate-200">
 
-      <div
-        class="bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 px-6 py-4 text-white flex justify-between items-center">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 flex items-center justify-center text-sm">
             <i id="modal-title-icon" class="fa-solid fa-user-plus"></i>
           </div>
           <div>
-            <h3 id="modal-title" class="font-extrabold text-base tracking-tight">Tambah Karyawan Baru</h3>
-            <p class="text-[11px] text-blue-100">Aero Corporation</p>
+            <h3 id="modal-title" class="font-bold text-base tracking-tight text-white">Tambah Karyawan Baru</h3>
+            <p class="text-[11px] text-slate-400">Aero Corporation</p>
           </div>
         </div>
         <button onclick="closeModalForm()"
-          class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1308,9 +1327,9 @@
       <form id="form-karyawan" onsubmit="handleSubmitForm(event)" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
         <input type="hidden" id="form-id" name="id">
 
-        <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-center space-x-4">
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center space-x-4">
           <div
-            class="relative w-20 h-20 rounded-2xl bg-white border-2 border-slate-200 shadow-sm overflow-hidden shrink-0 flex items-center justify-center text-slate-300">
+            class="relative w-20 h-20 rounded-xl bg-white border border-slate-200 shadow-2xs overflow-hidden shrink-0 flex items-center justify-center text-slate-300">
             <img id="form-preview-foto" src="" alt="Preview" class="w-full h-full object-cover hidden">
             <i id="form-preview-icon" class="fa-solid fa-user text-3xl text-slate-300"></i>
           </div>
@@ -1319,7 +1338,7 @@
             <input type="file" id="form-foto" name="foto" accept="image/png, image/jpeg, image/jpg, image/webp"
               class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer"
               onchange="handlePreviewImage(this)">
-            <p class="text-[11px] text-slate-400 mt-1">Maksimal 2 MB (Format: JPG, PNG, WebP)</p>
+            <p class="text-[11px] text-slate-500 mt-1">Maksimal 2 MB (Format: JPG, PNG, WebP)</p>
           </div>
         </div>
 
@@ -1441,11 +1460,11 @@
 
         <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2.5">
           <button type="button" onclick="closeModalForm()"
-            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition">
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
             Batal
           </button>
           <button type="submit" id="form-btn-submit"
-            class="px-5 py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/25 transition active:scale-95 flex items-center space-x-1.5">
+            class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95 flex items-center space-x-1.5">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Simpan Karyawan</span>
           </button>
@@ -1455,24 +1474,24 @@
     </div>
   </div>
 
-  <!-- ================= MODAL DETAIL & ID CARD DIGITAL ================= -->
+  <!-- MODAL DETAIL & ID CARD DIGITAL -->
   <div id="modal-detail-karyawan"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-sm w-full overflow-hidden transform transition-all border border-slate-200">
 
       <div class="p-6">
-        <!-- Printable ID Card Container -->
+        <!-- Printable ID Card Container (Executive Corporate Design) -->
         <div id="id-card-printable"
-          class="bg-gradient-to-b from-[#0f1d40] via-[#162744] to-[#0f1d40] rounded-2xl p-5 text-white border border-blue-400/40 shadow-xl relative overflow-hidden">
-          <div class="flex justify-between items-start border-b border-white/10 pb-4 mb-4">
+          class="bg-slate-900 rounded-xl p-5 text-white border border-slate-700 shadow-lg relative overflow-hidden">
+          <div class="flex justify-between items-start border-b border-slate-800 pb-4 mb-4">
             <div class="flex items-center space-x-2.5">
               <div
-                class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-base font-black shadow-md">
+                class="w-9 h-9 rounded-lg bg-blue-700 flex items-center justify-center text-white text-base font-black shadow-2xs">
                 AC</div>
               <div>
                 <h4 class="font-extrabold text-xs tracking-wider uppercase text-white">AERO CORPORATION</h4>
-                <p class="text-[9px] text-sky-300 font-semibold tracking-widest uppercase">Official Corporate Pass</p>
+                <p class="text-[9px] text-blue-300 font-semibold tracking-widest uppercase">Official Corporate Pass</p>
               </div>
             </div>
             <div class="id-chip shrink-0" title="Smart Card Chip"></div>
@@ -1480,27 +1499,27 @@
 
           <div class="flex items-center space-x-4 mb-4">
             <div id="detail-foto-container"
-              class="w-20 h-20 rounded-2xl bg-slate-800 border-2 border-blue-400/50 overflow-hidden shrink-0 flex items-center justify-center text-slate-400 shadow-md">
+              class="w-20 h-20 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center text-slate-500 shadow-xs">
               <img id="detail-foto" src="" alt="Foto" class="w-full h-full object-cover hidden">
-              <i id="detail-foto-icon" class="fa-solid fa-user text-3xl text-slate-400"></i>
+              <i id="detail-foto-icon" class="fa-solid fa-user text-3xl text-slate-500"></i>
             </div>
             <div class="overflow-hidden">
               <div class="flex items-center space-x-2 mb-1">
                 <span id="detail-card-badge"
-                  class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/25 text-blue-300 border border-blue-400/30 uppercase">TETAP</span>
+                  class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/20 text-blue-300 border border-blue-400/30 uppercase">TETAP</span>
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
               </div>
               <h3 id="detail-nama" class="text-sm font-extrabold text-white leading-tight truncate">-</h3>
-              <p id="detail-jabatan" class="text-xs text-sky-300 font-medium truncate">-</p>
+              <p id="detail-jabatan" class="text-xs text-blue-300 font-medium truncate">-</p>
               <p id="detail-departemen" class="text-[10px] text-slate-400 truncate">-</p>
               <div
-                class="mt-1.5 inline-block px-2 py-0.5 rounded-md bg-white/10 text-[11px] font-mono tracking-wider text-amber-300 font-semibold">
+                class="mt-1.5 inline-block px-2 py-0.5 rounded-md bg-slate-800 text-[11px] font-mono tracking-wider text-amber-300 font-semibold border border-slate-700">
                 ID Card: <span id="detail-nik">-</span>
               </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 text-[10px] bg-white/5 rounded-xl p-3 border border-white/10 mb-4">
+          <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-800/80 rounded-lg p-3 border border-slate-700 mb-4">
             <div>
               <p class="text-slate-400">Email:</p>
               <p id="detail-email" class="text-slate-200 font-medium truncate">-</p>
@@ -1523,19 +1542,19 @@
             </div>
           </div>
 
-          <div class="flex justify-between items-center pt-2 border-t border-white/10 text-[9px] text-slate-400">
-            <div class="font-mono tracking-widest text-[8px] text-slate-400">||||||| | ||||| |||| | |||||| |||</div>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-800 text-[9px] text-slate-500">
+            <div class="font-mono tracking-widest text-[8px] text-slate-500">||||||| | ||||| |||| | |||||| |||</div>
             <span>Authorized by Aero Corporation</span>
           </div>
         </div>
 
         <div class="mt-5 flex justify-end space-x-2.5">
           <button onclick="closeModalDetail()"
-            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition">
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
             Tutup
           </button>
           <button onclick="printIdCard()"
-            class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold flex items-center space-x-2 shadow-md shadow-blue-600/20 transition">
+            class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center space-x-2 shadow-xs transition">
             <i class="fa-solid fa-print"></i>
             <span>Cetak Kartu ID</span>
           </button>
@@ -1545,34 +1564,36 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PRATINJAU BUKTI SURAT DOKTER ================= -->
+  <!-- MODAL PRATINJAU BUKTI SURAT DOKTER -->
   <div id="modal-view-bukti"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-xl w-full overflow-hidden transform transition-all border border-slate-100">
-      <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 text-white flex justify-between items-center">
+      class="bg-white rounded-xl shadow-xl max-w-xl w-full overflow-hidden transform transition-all border border-slate-200">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <i class="fa-solid fa-file-medical text-base"></i>
-          <h3 class="font-extrabold text-base">Bukti Surat Dokter / Izin</h3>
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-file-medical"></i>
+          </div>
+          <h3 class="font-bold text-base text-white">Bukti Surat Dokter / Izin</h3>
         </div>
         <button onclick="closeModalViewBukti()"
-          class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
       <div class="p-4 sm:p-6 flex flex-col items-center">
         <div
-          class="w-full max-h-[70vh] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
+          class="w-full max-h-[70vh] rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
           <img id="modal-bukti-img" src="" alt="Bukti Surat Dokter" class="max-w-full max-h-[68vh] object-contain">
         </div>
         <div class="w-full pt-4 flex justify-between items-center text-xs">
           <a id="modal-bukti-download" href="" download
-            class="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-xl flex items-center space-x-1.5 transition">
+            class="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg flex items-center space-x-1.5 transition">
             <i class="fa-solid fa-download"></i>
             <span>Unduh Berkas</span>
           </a>
           <button type="button" onclick="closeModalViewBukti()"
-            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">
+            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition">
             Tutup
           </button>
         </div>
@@ -1580,24 +1601,24 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PENGAJUAN IZIN / SAKIT (DENGAN BUKTI SURAT) ================= -->
+  <!-- MODAL PENGAJUAN IZIN / SAKIT (DENGAN BUKTI SURAT) -->
   <div id="modal-izin-sakit"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden transform transition-all border border-slate-200">
 
-      <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4 text-white flex justify-between items-center">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 border border-slate-700 flex items-center justify-center text-sm">
             <i class="fa-solid fa-file-medical"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-base tracking-tight">Formulir Izin / Sakit</h3>
-            <p class="text-[11px] text-amber-100">Presensi Hari Ini</p>
+            <h3 class="font-bold text-base tracking-tight text-white">Formulir Izin / Sakit</h3>
+            <p class="text-[11px] text-slate-400">Presensi Hari Ini</p>
           </div>
         </div>
         <button onclick="closeModalIzinSakit()"
-          class="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1607,7 +1628,7 @@
           <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Karyawan <span
               class="text-rose-500">*</span></label>
           <select id="izin-karyawan-id" name="karyawan_id" required
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
             <option value="">-- Pilih Karyawan --</option>
           </select>
         </div>
@@ -1617,12 +1638,12 @@
               class="text-rose-500">*</span></label>
           <div class="grid grid-cols-2 gap-3">
             <label
-              class="flex items-center space-x-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+              class="flex items-center space-x-2 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
               <input type="radio" name="status" value="Izin" checked class="text-amber-600 focus:ring-amber-500">
               <span class="text-xs font-bold text-slate-700">Izin Resmi</span>
             </label>
             <label
-              class="flex items-center space-x-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+              class="flex items-center space-x-2 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
               <input type="radio" name="status" value="Sakit" class="text-amber-600 focus:ring-amber-500">
               <span class="text-xs font-bold text-slate-700">Sakit (Surat Dokter)</span>
             </label>
@@ -1634,7 +1655,7 @@
               class="text-rose-500">*</span></label>
           <textarea id="izin-keterangan" name="keterangan" rows="2" required
             placeholder="Jelaskan alasan izin atau sakit secara singkat dan jelas..."
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
         </div>
 
         <!-- Bukti Foto / Surat Dokter -->
@@ -1646,11 +1667,11 @@
 
         <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2.5">
           <button type="button" onclick="closeModalIzinSakit()"
-            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition">
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
             Batal
           </button>
           <button type="submit" id="btn-submit-izin"
-            class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition active:scale-95">
+            class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95">
             Kirim Pengajuan
           </button>
         </div>
@@ -1659,26 +1680,25 @@
     </div>
   </div>
 
-  <!-- ================= MODAL PENGATURAN SISTEM & EXPORT CSV (TERHUBUNG KE GAMBAR 2) ================= -->
+  <!-- MODAL PENGATURAN SISTEM & EXPORT CSV -->
   <div id="modal-settings"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-200">
 
       <!-- Modal Header -->
-      <div
-        class="bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 px-6 py-4 text-white flex justify-between items-center">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 flex items-center justify-center text-sm">
             <i class="fa-solid fa-gear"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-base tracking-tight">Pengaturan Sistem & Export</h3>
-            <p class="text-[11px] text-blue-100">Aero Corporation HR Portal</p>
+            <h3 class="font-bold text-base tracking-tight text-white">Pengaturan Sistem & Export</h3>
+            <p class="text-[11px] text-slate-400">Aero Corporation HR Portal</p>
           </div>
         </div>
         <button onclick="closeModalSettings()"
-          class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1686,9 +1706,9 @@
       <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
 
         <!-- Section 1: Ekspor Database (CSV) -->
-        <div class="p-4 rounded-2xl bg-blue-50/80 border border-blue-200/80">
-          <div class="flex items-center space-x-2 text-blue-900 font-extrabold text-xs uppercase tracking-wider mb-1.5">
-            <i class="fa-solid fa-file-export text-blue-600"></i>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-xs uppercase tracking-wider mb-1.5">
+            <i class="fa-solid fa-file-export text-blue-700"></i>
             <span>Ekspor Data Database (CSV)</span>
           </div>
           <p class="text-xs text-slate-600 mb-3.5 leading-relaxed">
@@ -1697,12 +1717,12 @@
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <a href="/api/export/csv" download
-              class="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-md shadow-blue-600/20 transition active:scale-95">
+              class="px-4 py-2.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-xs transition active:scale-95">
               <i class="fa-solid fa-file-csv text-base"></i>
               <span>Export CSV Karyawan</span>
             </a>
             <a href="/api/export/presensi/csv" download
-              class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-md shadow-emerald-600/20 transition active:scale-95">
+              class="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-xs transition active:scale-95">
               <i class="fa-solid fa-file-excel text-base"></i>
               <span>Export CSV Presensi</span>
             </a>
@@ -1710,14 +1730,14 @@
         </div>
 
         <!-- Section 2: Impor Data Karyawan (CSV) -->
-        <div class="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200/80">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
           <div class="flex items-center justify-between mb-1.5">
-            <div class="flex items-center space-x-2 text-indigo-900 font-extrabold text-xs uppercase tracking-wider">
-              <i class="fa-solid fa-file-import text-indigo-600"></i>
+            <div class="flex items-center space-x-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
+              <i class="fa-solid fa-file-import text-blue-700"></i>
               <span>Impor Data Karyawan (CSV)</span>
             </div>
             <a href="/api/export/template/csv" download title="Unduh format template CSV"
-              class="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 hover:underline flex items-center space-x-1">
+              class="text-[11px] font-bold text-blue-700 hover:text-blue-900 hover:underline flex items-center space-x-1">
               <i class="fa-solid fa-download text-[10px]"></i>
               <span>Unduh Template CSV</span>
             </a>
@@ -1729,9 +1749,9 @@
           <form id="form-import-csv" onsubmit="handleImportCsvSubmit(event)" class="space-y-2.5">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <input type="file" id="input-import-csv" accept=".csv, text/csv" required
-                class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200 file:cursor-pointer bg-white rounded-xl border border-indigo-200 p-1">
+                class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer bg-white rounded-lg border border-slate-200 p-1">
               <button type="submit" id="btn-submit-import-csv"
-                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center space-x-1.5 shrink-0">
+                class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95 flex items-center justify-center space-x-1.5 shrink-0">
                 <i class="fa-solid fa-upload"></i>
                 <span>Impor CSV</span>
               </button>
@@ -1739,8 +1759,64 @@
           </form>
         </div>
 
+        <!-- Section 1b: Pengaturan Lokasi Kantor & Geofencing GPS -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 text-slate-900 font-extrabold uppercase tracking-wider text-[11px]">
+              <i class="fa-solid fa-location-dot text-blue-600"></i>
+              <span>Titik Lokasi Kantor & Radius Presensi (GPS)</span>
+            </div>
+            <button type="button" onclick="setOfficeLocationFromCurrentGPS()"
+              class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200 transition flex items-center gap-1 shadow-2xs">
+              <i class="fa-solid fa-crosshairs"></i>
+              <span>Gunakan Lokasi Saya Saat Ini</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            Tentukan koordinat GPS kantor dan batas radius toleransi (meter). Karyawan yang absen di dalam radius ini
+            akan terverifikasi <strong>"Di Kantor"</strong>.
+          </p>
+
+          <form id="form-office-location" onsubmit="handleSaveOfficeLocation(event)" class="space-y-2.5 pt-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama Lokasi Kantor</label>
+                <input type="text" id="office-input-name" required placeholder="Contoh: Kantor Pusat Aero Corporation"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Batas Radius Toleransi (Meter)</label>
+                <input type="number" id="office-input-radius" min="10" max="10000" required placeholder="200"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Latitude</label>
+                <input type="number" step="any" id="office-input-lat" required placeholder="-6.2088"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Longitude</label>
+                <input type="number" step="any" id="office-input-lng" required placeholder="106.8456"
+                  class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+            <div
+              class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-1 border-t border-slate-200/60">
+              <span id="office-current-coords-hint" class="text-[10px] text-slate-500 font-mono">
+                Memuat konfigurasi kantor...
+              </span>
+              <button type="submit" id="btn-save-office-loc"
+                class="px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold transition shadow-xs">
+                Simpan Titik Kantor
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- Section 2: Info Akun Administrator -->
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-2">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Akun Terhubung:</span>
             <span id="settings-user-username" class="font-mono font-bold text-blue-700">admin</span>
@@ -1755,15 +1831,15 @@
           </div>
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-700">Status Keamanan:</span>
-            <span class="inline-flex items-center text-emerald-600 font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+            <span class="inline-flex items-center text-emerald-700 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
               Sesi Aktif
             </span>
           </div>
         </div>
 
         <!-- Section 3: Informasi Sistem -->
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-500 space-y-1.5">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 space-y-1.5">
           <div class="flex justify-between">
             <span>Versi Aplikasi:</span>
             <span class="font-semibold text-slate-700">v1.3.0 (Aero Portal)</span>
@@ -1780,7 +1856,7 @@
 
         <div class="pt-2 flex justify-end space-x-2">
           <button type="button" onclick="closeModalSettings()"
-            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition">
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
             Tutup
           </button>
         </div>
@@ -1789,21 +1865,21 @@
     </div>
   </div>
 
-  <!-- ================= MODAL GANTI KATA SANDI ================= -->
+  <!-- MODAL GANTI KATA SANDI -->
   <div id="modal-change-password"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden transform transition-all border border-slate-200">
 
-      <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 text-white flex justify-between items-center">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 flex items-center justify-center text-sm">
             <i class="fa-solid fa-key"></i>
           </div>
-          <h3 class="font-extrabold text-base tracking-tight">Ganti Kata Sandi</h3>
+          <h3 class="font-bold text-base tracking-tight text-white">Ganti Kata Sandi</h3>
         </div>
         <button onclick="closeModalChangePassword()"
-          class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1813,27 +1889,27 @@
           <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi Saat Ini <span
               class="text-rose-500">*</span></label>
           <input type="password" id="cp-old-password" required placeholder="Masukkan kata sandi lama..."
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi Baru <span
               class="text-rose-500">*</span></label>
           <input type="password" id="cp-new-password" required placeholder="Minimal 4 karakter..."
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Konfirmasi Kata Sandi Baru <span
               class="text-rose-500">*</span></label>
           <input type="password" id="cp-confirm-password" required placeholder="Ulangi kata sandi baru..."
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
           <button type="button" onclick="closeModalChangePassword()"
-            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition">
+            class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
             Batal
           </button>
           <button type="submit" id="btn-submit-cp"
-            class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition active:scale-95">
+            class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition active:scale-95">
             Simpan Kata Sandi
           </button>
         </div>
@@ -1841,44 +1917,44 @@
     </div>
   </div>
 
-  <!-- ================= MODAL BANTUAN & PANDUAN SISTEM ================= -->
+  <!-- MODAL BANTUAN & PANDUAN SISTEM -->
   <div id="modal-help-guide"
     class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div
-      class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-100">
+      class="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-200">
 
-      <div class="bg-gradient-to-r from-blue-700 to-indigo-800 px-6 py-4 text-white flex justify-between items-center">
+      <div class="modal-header-corporate">
         <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-sm">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 text-blue-400 border border-slate-700 flex items-center justify-center text-sm">
             <i class="fa-solid fa-book-open"></i>
           </div>
-          <h3 class="font-extrabold text-base tracking-tight">Bantuan & Panduan Sistem</h3>
+          <h3 class="font-bold text-base tracking-tight text-white">Bantuan & Panduan Sistem</h3>
         </div>
         <button onclick="closeModalHelpGuide()"
-          class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs text-slate-600">
-        <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
+        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-lg">
           <h4 class="font-bold text-blue-900 mb-1">1. Pengelolaan Data Karyawan</h4>
           <p>Tambahkan staf baru melalui tombol Tambah Karyawan di tab Data Karyawan. Gunakan fitur Auto ID Card untuk
             format standar AC0001, AC0002, dst.</p>
         </div>
-        <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
+        <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-lg">
           <h4 class="font-bold text-emerald-900 mb-1">2. Formulir Presensi & Surat Dokter</h4>
           <p>Catat kehadiran dan perizinan langsung melalui form presensi. Jika karyawan berhalangan karena sakit,
             lampirkan foto surat dokter untuk verifikasi.</p>
         </div>
-        <div class="p-3 bg-purple-50/70 border border-purple-200 rounded-xl">
-          <h4 class="font-bold text-purple-900 mb-1">3. Ekspor Data (CSV / Excel)</h4>
+        <div class="p-3 bg-slate-100 border border-slate-200 rounded-lg">
+          <h4 class="font-bold text-slate-900 mb-1">3. Ekspor Data (CSV / Excel)</h4>
           <p>Fitur ekspor CSV kini dipusatkan di menu Pengaturan Sistem (⚙) pada kapsul samping kiri atau dropdown
             profil akun.</p>
         </div>
         <div class="flex justify-end pt-2">
           <button type="button" onclick="closeModalHelpGuide()"
-            class="px-4 py-2 bg-blue-700 text-white rounded-xl text-xs font-bold hover:bg-blue-800 transition">
+            class="px-4 py-2 bg-blue-700 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition shadow-xs">
             Saya Mengerti
           </button>
         </div>
@@ -1887,7 +1963,7 @@
   </div>
 
   <!-- JavaScript Client Logic -->
-  <script src="js/app.js?v=2.7"></script>
+  <script src="js/app.js?v=3.3"></script>
 </body>
 
 </html>

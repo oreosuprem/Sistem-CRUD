@@ -82,7 +82,7 @@ app.post('/api/auth/login', (req, res) => {
     }
 
     // 2. Cek Karyawan di tabel karyawan
-    // Login akun karyawan: email resmi, password: ID Card karyawan (misal: AC0001, AC0003)
+    // Login akun karyawan: email resmi, password: ID Card karyawan (misal: AC000X)
     const karyawan = db.prepare(`
       SELECT id, nik, nama, email, departemen, jabatan, status_kerja, status_kepegawaian, foto
       FROM karyawan
@@ -822,27 +822,107 @@ app.post('/api/import/csv', upload.single('file'), (req, res) => {
     res.status(500).json({ success: false, message: 'Gagal memproses file CSV: ' + error.message });
   } finally {
     if (fs.existsSync(filePath)) {
-      try { fs.unlinkSync(filePath); } catch (e) {}
+      try { fs.unlinkSync(filePath); } catch (e) { }
     }
   }
 });
 
-// ==========================================
-// API PRESENSI / ABSENSI KARYAWAN
-// ==========================================
-
-// Helper to get formatted Indonesian date & time strings
+// API Presensi & Kehadiran Real-time
+// Helper to get formatted Indonesian date & time strings (WIB, Asia/Jakarta)
 const getNowIndo = () => {
-  const d = new Date();
-  // Adjust to UTC+7 (WIB)
-  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-  const wib = new Date(utc + (3600000 * 7));
-  const tanggal = wib.toISOString().slice(0, 10);
-  const jam = String(wib.getHours()).padStart(2, '0') + ':' + 
-              String(wib.getMinutes()).padStart(2, '0') + ':' + 
-              String(wib.getSeconds()).padStart(2, '0');
-  return { tanggal, jam };
+  const now = new Date();
+  const formatterDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const formatterTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const tanggal = formatterDate.format(now);
+  const jam = formatterTime.format(now);
+  return { tanggal, jam, now };
 };
+
+// Calculate distance in meters between two GPS coordinates using Haversine formula
+function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const numLat1 = parseFloat(lat1);
+  const numLon1 = parseFloat(lon1);
+  const numLat2 = parseFloat(lat2);
+  const numLon2 = parseFloat(lon2);
+  if (isNaN(numLat1) || isNaN(numLon1) || isNaN(numLat2) || isNaN(numLon2)) return null;
+
+  const R = 6371e3; // Earth radius in meters
+  const toRad = deg => (deg * Math.PI) / 180;
+  const dLat = toRad(numLat2 - numLat1);
+  const dLon = toRad(numLon2 - numLon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(numLat1)) * Math.cos(toRad(numLat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+// Get office location config
+function getOfficeConfig() {
+  let conf = db.prepare('SELECT * FROM office_location LIMIT 1').get();
+  if (!conf) {
+    db.prepare(`
+      INSERT INTO office_location (nama_kantor, latitude, longitude, radius_meter, alamat)
+      VALUES (?, ?, ?, ?, ?)
+    `).run('Kantor Pusat Aero Corporation', -6.3148979, 106.8382681, 200, 'Jl. Raya Lenteng Agung No.5, RT.5/RW.2, Lenteng Agung, Kec. Jagakarsa, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12530');
+    conf = db.prepare('SELECT * FROM office_location LIMIT 1').get();
+  }
+  return conf;
+}
+
+// API: Get Server Time (Anti-Tamper Real-Time Clock)
+app.get('/api/time', (req, res) => {
+  const { tanggal, jam, now } = getNowIndo();
+  res.json({
+    success: true,
+    server_time_ms: now.getTime(),
+    tanggal,
+    jam,
+    timezone: 'Asia/Jakarta (WIB, UTC+7)'
+  });
+});
+
+// API: Get Office Location Config
+app.get('/api/office-location', (req, res) => {
+  try {
+    const config = getOfficeConfig();
+    res.json({ success: true, data: config });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// API: Update Office Location Config (Admin only)
+app.put('/api/office-location', (req, res) => {
+  try {
+    const { nama_kantor, latitude, longitude, radius_meter, alamat } = req.body;
+    if (latitude == null || longitude == null) {
+      return res.status(400).json({ success: false, message: 'Latitude dan Longitude wajib diisi!' });
+    }
+    const current = getOfficeConfig();
+    db.prepare(`
+      UPDATE office_location SET
+        nama_kantor = ?,
+        latitude = ?,
+        longitude = ?,
+        radius_meter = ?,
+        alamat = ?
+      WHERE id = ?
+    `).run(
+      nama_kantor || current.nama_kantor,
+      parseFloat(latitude),
+      parseFloat(longitude),
+      parseInt(radius_meter, 10) || current.radius_meter,
+      alamat || current.alamat,
+      current.id
+    );
+    const updated = getOfficeConfig();
+    res.json({ success: true, message: 'Titik lokasi kantor berhasil diperbarui!', data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // API: Get Presensi Today Summary & Employee Status
 app.get('/api/presensi/today', (req, res) => {
@@ -865,7 +945,8 @@ app.get('/api/presensi/today', (req, res) => {
     const employees = db.prepare(`
       SELECT 
         k.id, k.nik, k.nama, k.departemen, k.jabatan, k.foto,
-        p.id as presensi_id, p.jam_masuk, p.jam_pulang, p.status as status_presensi, p.keterangan
+        p.id as presensi_id, p.jam_masuk, p.jam_pulang, p.status as status_presensi, p.keterangan,
+        p.status_lokasi, p.jarak_meter, p.status_lokasi_pulang
       FROM karyawan k
       LEFT JOIN presensi p ON k.id = p.karyawan_id AND p.tanggal = ?
       WHERE k.status_kerja = 'Aktif'
@@ -1077,7 +1158,7 @@ app.post('/api/presensi/masuk', (req, res) => {
 // API: Absen Pulang (Check-Out)
 app.post('/api/presensi/pulang', (req, res) => {
   try {
-    const { karyawan_id } = req.body;
+    const { karyawan_id, latitude, longitude } = req.body;
 
     if (!karyawan_id) {
       return res.status(400).json({ success: false, message: 'Pilih karyawan terlebih dahulu!' });
@@ -1112,34 +1193,69 @@ app.post('/api/presensi/pulang', (req, res) => {
       });
     }
 
-    db.prepare('UPDATE presensi SET jam_pulang = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(jam, existing.id);
+    // Geolocation verification for checkout
+    const office = getOfficeConfig();
+    let jarakMeterPulang = null;
+    let statusLokasiPulang = 'Di Luar Kantor';
+    let inputLat = (latitude != null && latitude !== '') ? parseFloat(latitude) : null;
+    let inputLng = (longitude != null && longitude !== '') ? parseFloat(longitude) : null;
+
+    if (inputLat != null && inputLng != null && !isNaN(inputLat) && !isNaN(inputLng)) {
+      jarakMeterPulang = calculateDistanceMeters(inputLat, inputLng, office.latitude, office.longitude);
+      if (jarakMeterPulang != null && jarakMeterPulang <= office.radius_meter) {
+        statusLokasiPulang = 'Di Kantor';
+      } else {
+        statusLokasiPulang = 'Di Luar Kantor';
+      }
+    } else {
+      statusLokasiPulang = 'Lokasi Tidak Terdeteksi';
+    }
+
+    db.prepare(`
+      UPDATE presensi SET 
+        jam_pulang = ?, 
+        latitude_pulang = ?, 
+        longitude_pulang = ?, 
+        jarak_meter_pulang = ?, 
+        status_lokasi_pulang = ?, 
+        updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `).run(jam, inputLat, inputLng, jarakMeterPulang, statusLokasiPulang, existing.id);
 
     res.json({
       success: true,
-      message: `Presensi Pulang berhasil dicatat untuk ${karyawan.nama} pada pukul ${jam}. Selamat beristirahat!`
+      message: `Presensi Pulang berhasil dicatat untuk ${karyawan.nama} pada pukul ${jam} WIB (${statusLokasiPulang}).`,
+      data: {
+        jam_pulang: jam,
+        status_lokasi_pulang: statusLokasiPulang,
+        jarak_meter_pulang: jarakMeterPulang
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// API: Form Input Presensi & Perizinan (with optional bukti_foto / surat dokter)
+// API: Form Input Presensi & Perizinan (with optional bukti_foto / surat dokter & GPS geolocation)
 app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
   try {
     const {
       karyawan_id,
-      tanggal,
       status = 'Hadir',
-      jam_masuk,
-      jam_pulang,
-      keterangan
+      keterangan,
+      latitude,
+      longitude,
+      lokasi
     } = req.body;
 
-    if (!karyawan_id || !tanggal || !status) {
-      return res.status(400).json({ success: false, message: 'Karyawan, Tanggal, dan Status wajib ditentukan!' });
+    if (!karyawan_id || !status) {
+      return res.status(400).json({ success: false, message: 'Karyawan dan Status wajib ditentukan!' });
     }
 
+    // Single source of truth: ALWAYS use genuine server-enforced real-time date and time (WIB, UTC+7)
+    // Any manipulation of device clock on client computer/phone is completely bypassed and ignored
     const { tanggal: nowTanggal, jam: nowJam } = getNowIndo();
+    const tanggal = nowTanggal;
     const bukti_foto = req.file ? req.file.filename : null;
 
     let finalJamMasuk = null;
@@ -1150,8 +1266,8 @@ app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
     let finalStatus = status;
 
     if (status === 'Hadir') {
-      finalJamMasuk = (jam_masuk && jam_masuk.trim() !== '') ? jam_masuk.trim() : nowJam;
-      finalJamPulang = (jam_pulang && jam_pulang.trim() !== '') ? jam_pulang.trim() : null;
+      finalJamMasuk = nowJam; // Strictly server time!
+      finalJamPulang = null;
       finalFoto = null;
 
       // Otomatis terdeteksi Terlambat jika jam masuk melewati 08:30:00 WIB
@@ -1165,13 +1281,33 @@ app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
       finalJamMasuk = null;
       finalJamPulang = null;
       finalKeterangan = keterangan ? keterangan.trim() : 'Izin';
-      finalFoto = null; // Absen izin hanya berisi alasan/keterangan
+      finalFoto = null;
     } else if (status === 'Sakit') {
       finalJamMasuk = null;
       finalJamPulang = null;
       finalKeterangan = keterangan ? keterangan.trim() : 'Sakit';
-      finalFoto = bukti_foto; // Khusus sakit ada upload foto/file surat dokter
+      finalFoto = bukti_foto;
     }
+
+    // Geolocation verification
+    const office = getOfficeConfig();
+    let jarakMeter = null;
+    let statusLokasi = 'Di Luar Kantor';
+    let inputLat = (latitude != null && latitude !== '') ? parseFloat(latitude) : null;
+    let inputLng = (longitude != null && longitude !== '') ? parseFloat(longitude) : null;
+
+    if (inputLat != null && inputLng != null && !isNaN(inputLat) && !isNaN(inputLng)) {
+      jarakMeter = calculateDistanceMeters(inputLat, inputLng, office.latitude, office.longitude);
+      if (jarakMeter != null && jarakMeter <= office.radius_meter) {
+        statusLokasi = 'Di Kantor';
+      } else {
+        statusLokasi = 'Di Luar Kantor';
+      }
+    } else {
+      statusLokasi = (status === 'Hadir' || status === 'Terlambat') ? 'Lokasi Tidak Terdeteksi' : '-';
+    }
+
+    const finalLokasi = lokasi ? lokasi.trim() : (statusLokasi === 'Di Kantor' ? office.nama_kantor : (statusLokasi || '-'));
 
     // Check if record exists for this employee and date
     const existing = db.prepare('SELECT id, bukti_foto, jam_masuk, jam_pulang FROM presensi WHERE karyawan_id = ? AND tanggal = ?').get(karyawan_id, tanggal);
@@ -1188,6 +1324,11 @@ app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
           jam_pulang = ?,
           keterangan = ?,
           bukti_foto = ?,
+          latitude = COALESCE(?, latitude),
+          longitude = COALESCE(?, longitude),
+          lokasi = COALESCE(?, lokasi),
+          jarak_meter = COALESCE(?, jarak_meter),
+          status_lokasi = COALESCE(?, status_lokasi),
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `).run(
@@ -1196,14 +1337,33 @@ app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
         finalJamPulang || existing.jam_pulang,
         finalKeterangan,
         finalFoto,
+        inputLat,
+        inputLng,
+        finalLokasi,
+        jarakMeter,
+        statusLokasi,
         existing.id
       );
 
-      res.json({ success: true, message: `Data presensi ${finalStatus} berhasil diperbarui!`, data: { status: finalStatus, bukti_foto: finalFoto } });
+      res.json({
+        success: true,
+        message: `Data presensi ${finalStatus} berhasil diperbarui! Jam: ${nowJam} WIB (${statusLokasi}).`,
+        data: {
+          status: finalStatus,
+          jam_masuk: finalJamMasuk,
+          tanggal,
+          status_lokasi: statusLokasi,
+          jarak_meter: jarakMeter,
+          bukti_foto: finalFoto
+        }
+      });
     } else {
       db.prepare(`
-        INSERT INTO presensi (karyawan_id, tanggal, jam_masuk, jam_pulang, status, keterangan, bukti_foto, metode)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Form Portal')
+        INSERT INTO presensi (
+          karyawan_id, tanggal, jam_masuk, jam_pulang, status, keterangan, bukti_foto, 
+          metode, latitude, longitude, lokasi, jarak_meter, status_lokasi
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'Form Portal', ?, ?, ?, ?, ?)
       `).run(
         karyawan_id,
         tanggal,
@@ -1211,10 +1371,26 @@ app.post('/api/presensi/form', upload.single('bukti_foto'), (req, res) => {
         finalJamPulang,
         finalStatus,
         finalKeterangan,
-        finalFoto
+        finalFoto,
+        inputLat,
+        inputLng,
+        finalLokasi,
+        jarakMeter,
+        statusLokasi
       );
 
-      res.status(201).json({ success: true, message: `Presensi ${finalStatus} berhasil dicatat!`, data: { status: finalStatus, bukti_foto: finalFoto } });
+      res.status(201).json({
+        success: true,
+        message: `Presensi ${finalStatus} berhasil dicatat pada ${nowJam} WIB (${statusLokasi})!`,
+        data: {
+          status: finalStatus,
+          jam_masuk: finalJamMasuk,
+          tanggal,
+          status_lokasi: statusLokasi,
+          jarak_meter: jarakMeter,
+          bukti_foto: finalFoto
+        }
+      });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
