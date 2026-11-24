@@ -518,6 +518,9 @@ async function openModalSettings() {
   } catch (e) {
     console.error('Gagal memuat setting kantor:', e);
   }
+
+  // Load audit logs automatically
+  loadAuditLogs();
 }
 
 function closeModalSettings() {
@@ -1514,6 +1517,9 @@ function renderTable(data, pagination) {
         <!-- Aksi Buttons -->
         <td class="py-3.5 px-4 text-center">
           <div class="flex items-center justify-center space-x-1.5">
+            <button onclick="openModalSlipGaji(${item.id})" title="Cetak Slip Gaji Digital" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition shadow-xs">
+              <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+            </button>
             <button onclick="openModalDetail(${item.id})" title="Lihat & Cetak ID Card" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition shadow-xs">
               <i class="fa-solid fa-id-badge text-xs"></i>
             </button>
@@ -1997,9 +2003,12 @@ function confirmDelete(id, nama, nik) {
   });
 }
 
+let currentDetailKaryawanId = null;
+
 // Open Modal Detail (Digital ID Card)
 async function openModalDetail(id) {
   try {
+    currentDetailKaryawanId = id;
     const res = await fetch(`/api/karyawan/${id}`);
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
@@ -2048,7 +2057,262 @@ function closeModalDetail() {
 
 // Print ID Card
 function printIdCard() {
+  document.body.classList.add('printing-id-card');
   window.print();
+  document.body.classList.remove('printing-id-card');
+}
+
+// ================= MODUL 1: LOGIKA SLIP GAJI DIGITAL ================= //
+let currentSlipKaryawanId = null;
+
+async function openModalSlipGaji(karyawanId, defaultBulan = '') {
+  currentSlipKaryawanId = karyawanId;
+  const modal = document.getElementById('modal-slip-gaji');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const monthInput = document.getElementById('slip-filter-bulan');
+  if (monthInput) {
+    if (defaultBulan) {
+      monthInput.value = defaultBulan;
+    } else if (!monthInput.value) {
+      const now = new Date();
+      const yr = now.getFullYear();
+      const mo = String(now.getMonth() + 1).padStart(2, '0');
+      monthInput.value = `${yr}-${mo}`;
+    }
+  }
+
+  await fetchSlipGajiData();
+}
+
+function openModalSlipGajiFromDetail() {
+  if (currentDetailKaryawanId) {
+    closeModalDetail();
+    openModalSlipGaji(currentDetailKaryawanId);
+  }
+}
+
+function closeModalSlipGaji() {
+  const modal = document.getElementById('modal-slip-gaji');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function fetchSlipGajiData() {
+  if (!currentSlipKaryawanId) return;
+  const monthInput = document.getElementById('slip-filter-bulan');
+  const bulan = monthInput?.value || '';
+
+  try {
+    const res = await fetch(`/api/karyawan/${currentSlipKaryawanId}/slip-gaji?bulan=${bulan}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message);
+
+    const d = json.data;
+    document.getElementById('slip-nomor').textContent = d.nomor_slip;
+    
+    // Format Month name in Indonesian (e.g. November 2026)
+    const [y, m] = d.periode.split('-');
+    const monthNamesIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const monthName = monthNamesIndo[parseInt(m) - 1] || m;
+    document.getElementById('slip-periode-label').textContent = `Periode: ${monthName} ${y}`;
+
+    // Identitas Karyawan
+    document.getElementById('slip-karyawan-nama').textContent = d.karyawan.nama;
+    document.getElementById('slip-karyawan-nik').textContent = d.karyawan.nik;
+    document.getElementById('slip-karyawan-jabatan').textContent = d.karyawan.jabatan;
+    document.getElementById('slip-karyawan-departemen').textContent = d.karyawan.departemen;
+    document.getElementById('slip-sign-karyawan').textContent = d.karyawan.nama;
+
+    // Rekap Kehadiran
+    document.getElementById('slip-presensi-hadir').textContent = d.rekap_presensi.total_hadir;
+    document.getElementById('slip-presensi-terlambat').textContent = d.rekap_presensi.terlambat;
+    document.getElementById('slip-presensi-izin').textContent = d.rekap_presensi.izin + d.rekap_presensi.sakit;
+
+    // Rincian Penerimaan
+    document.getElementById('slip-val-gaji-pokok').textContent = formatRupiah(d.rincian_penerimaan.gaji_pokok);
+    document.getElementById('slip-val-tunj-jabatan').textContent = formatRupiah(d.rincian_penerimaan.tunjangan_jabatan);
+    document.getElementById('slip-val-tunj-kehadiran').textContent = formatRupiah(d.rincian_penerimaan.tunjangan_kehadiran);
+    document.getElementById('slip-val-tunj-komunikasi').textContent = formatRupiah(d.rincian_penerimaan.tunjangan_komunikasi);
+    document.getElementById('slip-val-total-penerimaan').textContent = formatRupiah(d.rincian_penerimaan.total_penerimaan);
+
+    // Rincian Potongan
+    document.getElementById('slip-val-pot-terlambat').textContent = formatRupiah(d.rincian_potongan.potongan_terlambat);
+    document.getElementById('slip-val-pot-bpjs').textContent = formatRupiah(d.rincian_potongan.bpjs_ketenagakerjaan);
+    document.getElementById('slip-val-total-potongan').textContent = formatRupiah(d.rincian_potongan.total_potongan);
+
+    // Gaji Bersih
+    document.getElementById('slip-val-gaji-bersih').textContent = formatRupiah(d.gaji_bersih);
+    document.getElementById('slip-tanggal-cetak').textContent = `Tanggal: ${d.tanggal_cetak} (WIB)`;
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal Memuat Slip Gaji',
+      text: err.message,
+      confirmButtonColor: '#1d4ed8'
+    });
+  }
+}
+
+function printSlipGaji() {
+  document.body.classList.add('printing-slip');
+  window.print();
+  document.body.classList.remove('printing-slip');
+}
+
+// ================= MODUL 2: LOGIKA REKAPITULASI BULANAN ================= //
+let currentPresensiSubTab = 'daily';
+
+function switchPresensiSubTab(tab) {
+  currentPresensiSubTab = tab;
+  const btnDaily = document.getElementById('btn-subtab-daily');
+  const btnMonthly = document.getElementById('btn-subtab-monthly');
+  const viewDaily = document.getElementById('presensi-subview-daily');
+  const viewMonthly = document.getElementById('presensi-subview-monthly');
+
+  if (tab === 'daily') {
+    if (btnDaily) btnDaily.className = 'flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition flex items-center justify-center space-x-1.5';
+    if (btnMonthly) btnMonthly.className = 'flex-1 sm:flex-none px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition flex items-center justify-center space-x-1.5';
+    viewDaily?.classList.remove('hidden');
+    viewMonthly?.classList.add('hidden');
+    fetchPresensi(currentPresensiPage);
+  } else {
+    if (btnDaily) btnDaily.className = 'flex-1 sm:flex-none px-3 py-1.5 rounded-md text-slate-600 hover:text-slate-900 transition flex items-center justify-center space-x-1.5';
+    if (btnMonthly) btnMonthly.className = 'flex-1 sm:flex-none px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition flex items-center justify-center space-x-1.5';
+    viewDaily?.classList.add('hidden');
+    viewMonthly?.classList.remove('hidden');
+
+    const filterMonth = document.getElementById('filter-rekap-bulan');
+    if (filterMonth && !filterMonth.value) {
+      const now = new Date();
+      const yr = now.getFullYear();
+      const mo = String(now.getMonth() + 1).padStart(2, '0');
+      filterMonth.value = `${yr}-${mo}`;
+    }
+    fetchRekapBulanan();
+  }
+}
+
+async function fetchRekapBulanan() {
+  const tbody = document.getElementById('table-rekap-monthly-body');
+  const summaryInfo = document.getElementById('rekap-summary-info');
+  const exportBtn = document.getElementById('btn-export-rekap-csv');
+  const filterMonth = document.getElementById('filter-rekap-bulan')?.value || '';
+  const filterDept = document.getElementById('filter-rekap-departemen')?.value || '';
+
+  if (exportBtn) {
+    exportBtn.href = `/api/export/presensi/rekap/csv?bulan=${filterMonth}`;
+  }
+
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Menghitung rekapitulasi performa presensi seluruh staf...</td></tr>`;
+  }
+
+  try {
+    const res = await fetch(`/api/presensi/rekap-bulanan?bulan=${filterMonth}&departemen=${encodeURIComponent(filterDept)}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message);
+
+    const data = json.data || [];
+    if (summaryInfo) {
+      summaryInfo.textContent = `Menampilkan rekapitulasi ${data.length} karyawan aktif periode ${json.bulan}.`;
+    }
+
+    if (data.length === 0) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500">Tidak ada data karyawan ditemukan.</td></tr>`;
+      return;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = data.map((item, idx) => {
+        let badgeScore = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        let statusText = 'Sangat Baik';
+        if (item.persentase_kehadiran < 70) {
+          badgeScore = 'bg-rose-50 text-rose-800 border-rose-200';
+          statusText = 'Perlu Evaluasi';
+        } else if (item.persentase_kehadiran < 85) {
+          badgeScore = 'bg-amber-50 text-amber-800 border-amber-200';
+          statusText = 'Cukup';
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition duration-150">
+            <td class="py-3 px-4 text-center font-bold text-slate-500 text-xs">${idx + 1}</td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900">${escapeHtml(item.nama)}</div>
+              <div class="text-[11px] font-mono text-blue-700 font-semibold">${escapeHtml(item.nik)}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="text-xs text-slate-800 font-medium">${escapeHtml(item.departemen)}</div>
+              <div class="text-[11px] text-slate-500">${escapeHtml(item.jabatan)}</div>
+            </td>
+            <td class="py-3 px-4 text-center font-bold text-emerald-700 font-mono">${item.tepat_waktu}</td>
+            <td class="py-3 px-4 text-center font-bold ${item.terlambat > 0 ? 'text-amber-700 font-mono' : 'text-slate-400'}">${item.terlambat}</td>
+            <td class="py-3 px-4 text-center font-bold ${item.izin + item.sakit > 0 ? 'text-sky-700 font-mono' : 'text-slate-400'}">${item.izin + item.sakit}</td>
+            <td class="py-3 px-4 text-center font-black text-slate-900 font-mono">${item.total_hadir} hr</td>
+            <td class="py-3 px-4 text-center">
+              <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeScore}">
+                <span>${item.persentase_kehadiran}%</span>
+                <span class="text-[10px] font-medium opacity-80">(${statusText})</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="openModalSlipGaji(${item.karyawan_id}, '${json.bulan}')"
+                class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1 mx-auto shadow-2xs">
+                <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                <span>Slip Gaji</span>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-rose-600">Gagal memuat rekap: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+}
+
+// ================= MODUL 4: LOGIKA AUDIT TRAIL ================= //
+async function loadAuditLogs() {
+  const container = document.getElementById('audit-log-container');
+  if (!container) return;
+  container.innerHTML = '<div class="text-slate-500 italic p-2 bg-white rounded border border-slate-200 text-center">Memuat riwayat audit...</div>';
+  try {
+    const res = await fetch('/api/audit-logs?limit=30');
+    const json = await res.json();
+    if (!json.success || !json.data || json.data.length === 0) {
+      container.innerHTML = '<div class="text-slate-500 p-2 bg-white rounded border border-slate-200 text-center">Belum ada riwayat aktivitas yang tercatat.</div>';
+      return;
+    }
+
+    container.innerHTML = json.data.map(log => {
+      let badgeColor = 'bg-slate-100 text-slate-700 border-slate-200';
+      if (log.action.includes('LOGIN')) badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
+      else if (log.action.includes('CREATE') || log.action.includes('INIT')) badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      else if (log.action.includes('UPDATE') || log.action.includes('SLIP')) badgeColor = 'bg-sky-50 text-sky-700 border-sky-200';
+      else if (log.action.includes('DELETE')) badgeColor = 'bg-rose-50 text-rose-700 border-rose-200';
+
+      const timeStr = log.created_at ? log.created_at.replace('T', ' ').slice(0, 19) : '-';
+
+      return `
+        <div class="p-2 rounded bg-white border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 hover:bg-slate-50 transition">
+          <div class="flex items-center space-x-2">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${badgeColor} font-sans uppercase">${escapeHtml(log.action)}</span>
+            <span class="text-slate-800 font-semibold">${escapeHtml(log.detail || '-')}</span>
+          </div>
+          <div class="flex items-center space-x-2 text-slate-500 text-[10px] shrink-0 font-mono">
+            <span>${escapeHtml(log.username || 'System')}</span>
+            <span>&bull;</span>
+            <span>${timeStr}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    container.innerHTML = `<div class="text-rose-600 p-2 bg-white rounded border border-rose-200 text-center">Gagal memuat log: ${escapeHtml(err.message)}</div>`;
+  }
 }
 
 // 3. FITUR PRESENSI & ABSENSI KARYAWAN

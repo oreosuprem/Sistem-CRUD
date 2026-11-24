@@ -67,6 +67,8 @@ app.post('/api/auth/login', (req, res) => {
     `).get(trimmedIdentifier, trimmedIdentifier);
 
     if (user && user.password === cleanPassword) {
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+      db.logActivity(user.id, user.username, 'ADMIN', 'LOGIN', `Administrator ${user.nama} berhasil masuk sistem`, ip);
       return res.json({
         success: true,
         message: 'Login berhasil! Mengalihkan ke dashboard Administrator...',
@@ -1539,6 +1541,310 @@ app.get('/api/export/presensi/csv', (req, res) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(csvContent);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ================= MODUL 1: GENERATOR & CETAK SLIP GAJI DIGITAL ================= //
+app.get('/api/karyawan/:id/slip-gaji', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tanggal: todayStr } = getNowIndo();
+    const defaultBulan = todayStr.slice(0, 7); // Format: YYYY-MM
+    const bulan = req.query.bulan || defaultBulan;
+
+    const karyawan = db.prepare('SELECT * FROM karyawan WHERE id = ?').get(id);
+    if (!karyawan) {
+      return res.status(404).json({ success: false, message: 'Data karyawan tidak ditemukan.' });
+    }
+
+    // Ambil data presensi di bulan tersebut
+    const presensiList = db.prepare(`
+      SELECT * FROM presensi 
+      WHERE karyawan_id = ? AND strftime('%Y-%m', tanggal) = ?
+      ORDER BY tanggal ASC
+    `).all(id, bulan);
+
+    let totalHadir = 0;
+    let tepatWaktu = 0;
+    let terlambat = 0;
+    let totalMenitTerlambat = 0;
+    let izin = 0;
+    let sakit = 0;
+
+    presensiList.forEach(p => {
+      if (p.status === 'Hadir') {
+        totalHadir++;
+        if (p.jam_masuk && p.jam_masuk > '08:30:00') {
+          terlambat++;
+          const parts = p.jam_masuk.split(':').map(Number);
+          const menitMasuk = parts[0] * 60 + parts[1];
+          const menitBatas = 8 * 60 + 30; // 510
+          if (menitMasuk > menitBatas) {
+            totalMenitTerlambat += (menitMasuk - menitBatas);
+          }
+        } else {
+          tepatWaktu++;
+        }
+      } else if (p.status === 'Izin') {
+        izin++;
+      } else if (p.status === 'Sakit') {
+        sakit++;
+      }
+    });
+
+    const gajiPokok = Number(karyawan.gaji) || 0;
+    // Tunjangan Jabatan: 10% gaji pokok
+    const tunjanganJabatan = Math.round(gajiPokok * 0.10);
+    // Tunjangan Transport & Makan: Rp 25.000 per hari hadir
+    const tunjanganKehadiran = totalHadir * 25000;
+    // Tunjangan Komunikasi & Operasional
+    const tunjanganKomunikasi = 150000;
+    const totalPenerimaan = gajiPokok + tunjanganJabatan + tunjanganKehadiran + tunjanganKomunikasi;
+
+    // Potongan keterlambatan: Rp 20.000 per kejadian terlambat
+    const potonganTerlambat = terlambat * 20000;
+    // Iuran BPJS Ketenagakerjaan & Kesehatan (2% gaji pokok)
+    const bpjs = Math.round(gajiPokok * 0.02);
+    const totalPotongan = potonganTerlambat + bpjs;
+
+    // Gaji Bersih / Take-Home Pay
+    const gajiBersih = Math.max(0, totalPenerimaan - totalPotongan);
+
+    // Format nomor slip gaji: SG/AC/YYYYMM/ID
+    const cleanBulanNum = bulan.replace('-', '');
+    const nomorSlip = `SG/AC/${cleanBulanNum}/${String(karyawan.id).padStart(4, '0')}`;
+
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+    db.logActivity(null, 'Administrator', 'ADMIN', 'SLIP_GAJI_GENERATED', `Mencetak slip gaji ${karyawan.nama} (${karyawan.nik}) periode ${bulan}`, ip);
+
+    res.json({
+      success: true,
+      data: {
+        nomor_slip: nomorSlip,
+        periode: bulan,
+        tanggal_cetak: todayStr,
+        karyawan: {
+          id: karyawan.id,
+          nik: karyawan.nik,
+          nama: karyawan.nama,
+          email: karyawan.email,
+          telepon: karyawan.telepon,
+          departemen: karyawan.departemen,
+          jabatan: karyawan.jabatan,
+          status_kepegawaian: karyawan.status_kepegawaian,
+          status_kerja: karyawan.status_kerja,
+          tanggal_masuk: karyawan.tanggal_masuk
+        },
+        rekap_presensi: {
+          total_hadir: totalHadir,
+          tepat_waktu: tepatWaktu,
+          terlambat: terlambat,
+          total_menit_terlambat: totalMenitTerlambat,
+          izin: izin,
+          sakit: sakit
+        },
+        rincian_penerimaan: {
+          gaji_pokok: gajiPokok,
+          tunjangan_jabatan: tunjanganJabatan,
+          tunjangan_kehadiran: tunjanganKehadiran,
+          tunjangan_komunikasi: tunjanganKomunikasi,
+          total_penerimaan: totalPenerimaan
+        },
+        rincian_potongan: {
+          potongan_terlambat: potonganTerlambat,
+          bpjs_ketenagakerjaan: bpjs,
+          total_potongan: totalPotongan
+        },
+        gaji_bersih: gajiBersih
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ================= MODUL 2: REKAPITULASI PRESENSI BULANAN ================= //
+app.get('/api/presensi/rekap-bulanan', (req, res) => {
+  try {
+    const { tanggal: todayStr } = getNowIndo();
+    const defaultBulan = todayStr.slice(0, 7);
+    const bulan = req.query.bulan || defaultBulan;
+    const { departemen = '' } = req.query;
+
+    let queryKaryawan = 'SELECT id, nik, nama, departemen, jabatan, status_kepegawaian, status_kerja FROM karyawan WHERE status_kerja != "Nonaktif"';
+    const params = [];
+    if (departemen) {
+      queryKaryawan += ' AND departemen = ?';
+      params.push(departemen);
+    }
+    queryKaryawan += ' ORDER BY nama ASC';
+
+    const karyawanList = db.prepare(queryKaryawan).all(...params);
+
+    const presensiBulan = db.prepare(`
+      SELECT karyawan_id, status, jam_masuk 
+      FROM presensi 
+      WHERE strftime('%Y-%m', tanggal) = ?
+    `).all(bulan);
+
+    const presensiMap = {};
+    presensiBulan.forEach(p => {
+      if (!presensiMap[p.karyawan_id]) {
+        presensiMap[p.karyawan_id] = [];
+      }
+      presensiMap[p.karyawan_id].push(p);
+    });
+
+    const hariKerjaStandar = 22;
+
+    const rekap = karyawanList.map((k, idx) => {
+      const records = presensiMap[k.id] || [];
+      let tepatWaktu = 0;
+      let terlambat = 0;
+      let izin = 0;
+      let sakit = 0;
+
+      records.forEach(r => {
+        if (r.status === 'Hadir') {
+          if (r.jam_masuk && r.jam_masuk > '08:30:00') {
+            terlambat++;
+          } else {
+            tepatWaktu++;
+          }
+        } else if (r.status === 'Izin') {
+          izin++;
+        } else if (r.status === 'Sakit') {
+          sakit++;
+        }
+      });
+
+      const totalHadir = tepatWaktu + terlambat;
+      const persentase = Math.min(100, Math.round((totalHadir / hariKerjaStandar) * 100));
+
+      return {
+        no: idx + 1,
+        karyawan_id: k.id,
+        nik: k.nik,
+        nama: k.nama,
+        departemen: k.departemen,
+        jabatan: k.jabatan,
+        status_kepegawaian: k.status_kepegawaian,
+        tepat_waktu: tepatWaktu,
+        terlambat: terlambat,
+        izin: izin,
+        sakit: sakit,
+        total_hadir: totalHadir,
+        persentase_kehadiran: persentase
+      };
+    });
+
+    res.json({
+      success: true,
+      bulan: bulan,
+      total_karyawan: karyawanList.length,
+      data: rekap
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Export Rekap Bulanan CSV
+app.get('/api/export/presensi/rekap/csv', (req, res) => {
+  try {
+    const { tanggal: todayStr } = getNowIndo();
+    const defaultBulan = todayStr.slice(0, 7);
+    const bulan = req.query.bulan || defaultBulan;
+
+    const karyawanList = db.prepare('SELECT id, nik, nama, departemen, jabatan FROM karyawan WHERE status_kerja != "Nonaktif" ORDER BY nama ASC').all();
+    const presensiBulan = db.prepare(`SELECT karyawan_id, status, jam_masuk FROM presensi WHERE strftime('%Y-%m', tanggal) = ?`).all(bulan);
+
+    const presensiMap = {};
+    presensiBulan.forEach(p => {
+      if (!presensiMap[p.karyawan_id]) presensiMap[p.karyawan_id] = [];
+      presensiMap[p.karyawan_id].push(p);
+    });
+
+    const headers = [
+      'No',
+      'NIK / ID Card',
+      'Nama Karyawan',
+      'Departemen',
+      'Jabatan',
+      'Hadir Tepat Waktu',
+      'Terlambat',
+      'Izin',
+      'Sakit',
+      'Total Kehadiran (Hari)',
+      'Persentase Kehadiran (%)'
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const lines = [headers.join(',')];
+
+    karyawanList.forEach((k, idx) => {
+      const records = presensiMap[k.id] || [];
+      let tepatWaktu = 0;
+      let terlambat = 0;
+      let izin = 0;
+      let sakit = 0;
+
+      records.forEach(r => {
+        if (r.status === 'Hadir') {
+          if (r.jam_masuk && r.jam_masuk > '08:30:00') terlambat++;
+          else tepatWaktu++;
+        } else if (r.status === 'Izin') izin++;
+        else if (r.status === 'Sakit') sakit++;
+      });
+
+      const totalHadir = tepatWaktu + terlambat;
+      const persentase = Math.min(100, Math.round((totalHadir / 22) * 100));
+
+      lines.push([
+        idx + 1,
+        escapeCsv(k.nik),
+        escapeCsv(k.nama),
+        escapeCsv(k.departemen),
+        escapeCsv(k.jabatan),
+        tepatWaktu,
+        terlambat,
+        izin,
+        sakit,
+        totalHadir,
+        `${persentase}%`
+      ].join(','));
+    });
+
+    const csvContent = '\uFEFF' + lines.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="rekap-presensi-bulanan-${bulan}.csv"`);
+    res.send(csvContent);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ================= MODUL 4: AUDIT LOG RIWAYAT AKTIVITAS ================= //
+app.get('/api/audit-logs', (req, res) => {
+  try {
+    const limit = Math.min(100, Math.max(10, parseInt(req.query.limit) || 30));
+    const logs = db.prepare(`
+      SELECT * FROM audit_logs 
+      ORDER BY id DESC 
+      LIMIT ?
+    `).all(limit);
+
+    res.json({
+      success: true,
+      data: logs
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
