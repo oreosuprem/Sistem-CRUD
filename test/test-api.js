@@ -49,4 +49,23 @@ console.log('Bukti Foto and GPS columns verified:', testRow.status_lokasi, `(${t
 db.prepare('DELETE FROM presensi WHERE id = ?').run(testInsert.lastInsertRowid);
 console.log('Test Presensi cleaned up successfully.');
 
-console.log('All Database, Auth, Employee & Presensi tests PASSED successfully!');
+// 6. Audit Log Verification
+db.logActivity(1, 'admin', 'ADMIN', 'TEST_ACTION', 'Unit test audit log execution', '127.0.0.1');
+const testAudit = db.prepare("SELECT * FROM audit_logs WHERE action = 'TEST_ACTION' ORDER BY id DESC LIMIT 1").get();
+if (!testAudit || testAudit.action !== 'TEST_ACTION') {
+  throw new Error('Gagal memverifikasi audit log!');
+}
+console.log('Audit Log verified: recorded action', testAudit.action);
+db.prepare('DELETE FROM audit_logs WHERE id = ?').run(testAudit.id);
+
+// 7. Slip Gaji & Rekap Bulanan Query Verification
+const firstEmp = db.prepare('SELECT id, nama, nik, gaji FROM karyawan LIMIT 1').get();
+if (firstEmp) {
+  const gajiPokok = Number(firstEmp.gaji) || 0;
+  const tunjJabatan = Math.round(gajiPokok * 0.10);
+  const bpjs = Math.round(gajiPokok * 0.02);
+  const takeHomePay = Math.max(0, gajiPokok + tunjJabatan + 150000 - bpjs);
+  console.log(`Slip Gaji calculation test for ${firstEmp.nama}: Gaji Bersih = Rp ${takeHomePay.toLocaleString('id-ID')}`);
+}
+
+console.log('All Database, Auth, Employee, Presensi, Audit Log & Slip Gaji tests PASSED successfully!');

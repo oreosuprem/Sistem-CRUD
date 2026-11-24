@@ -77,6 +77,17 @@ db.exec(`
     alamat TEXT DEFAULT 'Jl. Raya Lenteng Agung No.5, RT.5/RW.2, Lenteng Agung, Kec. Jagakarsa, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12530',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    username TEXT,
+    role TEXT DEFAULT 'ADMIN',
+    action TEXT NOT NULL,
+    detail TEXT,
+    ip_address TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Migration for existing databases to ensure columns exist
@@ -126,5 +137,25 @@ try {
 } catch (err) {
   console.error('Error seeding default user:', err);
 }
+
+// Audit Log Helper
+db.logActivity = function(userId, username, role, action, detail, ipAddress = '') {
+  try {
+    db.prepare(`
+      INSERT INTO audit_logs (user_id, username, role, action, detail, ip_address)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(userId || null, username || 'System', role || 'SYSTEM', action, detail, ipAddress);
+  } catch (err) {
+    console.error('Error logging activity:', err);
+  }
+};
+
+// Seed initial system audit log if table is empty
+try {
+  const audit = db.prepare('SELECT id FROM audit_logs LIMIT 1').get();
+  if (!audit) {
+    db.logActivity(1, 'admin', 'ADMIN', 'SYSTEM_INIT', 'Sistem Manajemen SDM Aero Corporation diinisialisasi', '127.0.0.1');
+  }
+} catch (e) {}
 
 module.exports = db;
